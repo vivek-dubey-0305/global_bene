@@ -20,13 +20,18 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// 🔁 Handle token expiry (refresh logic)
+// 🔁 Handle token expiry (refresh logic) - FIXED: Only trigger for authenticated sessions
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const hasAccessToken = !!localStorage.getItem('accessToken'); // NEW: Check if token exists
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 && 
+      !originalRequest._retry && 
+      hasAccessToken // NEW: Only refresh/redirect if user was authenticated
+    ) {
       originalRequest._retry = true;
 
       try {
@@ -46,12 +51,13 @@ axiosInstance.interceptors.response.use(
         // Refresh failed, logout
         localStorage.removeItem('accessToken');
         if (window.location.pathname !== '/login') {
-          window.location.href = '/login';
+          window.location.href = '/login'; // Safe now: Only hits if had token
         }
         return Promise.reject(refreshError);
       }
     }
 
+    // For unauth 401s (no token), just reject - let component handle error
     return Promise.reject(error);
   }
 );

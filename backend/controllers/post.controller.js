@@ -7,6 +7,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.utils.js";
 import { cloudinaryPostRefer } from "../utils/constants.utils.js";
+import { logActivity } from "../utils/logActivity.utils.js";
 
 // Create a new post
 export const createPost = asyncHandler(async (req, res) => {
@@ -54,6 +55,13 @@ export const createPost = asyncHandler(async (req, res) => {
 
     await post.populate('author', 'fullName avatar');
     await post.populate('community', 'name');
+
+    await logActivity(
+        author,
+        "post",
+        `${req.user.fullName} created a post: ${title}`,
+        req
+    );
 
     res.status(201).json(new ApiResponse(201, post, "Post created successfully"));
 });
@@ -145,6 +153,13 @@ export const updatePost = asyncHandler(async (req, res) => {
     await post.populate('author', 'fullName avatar');
     await post.populate('community', 'name');
 
+    await logActivity(
+        userId,
+        "update-post",
+        `${req.user.fullName} updated post: ${post.title}`,
+        req
+    );
+
     res.status(200).json(new ApiResponse(200, post, "Post updated successfully"));
 });
 
@@ -164,6 +179,13 @@ export const deletePost = asyncHandler(async (req, res) => {
     if (!isAuthor && !isModerator) {
         throw new ApiError(403, "Only author or moderator can delete post");
     }
+
+    await logActivity(
+        userId,
+        "delete-post",
+        `${req.user.fullName} deleted post: ${post.title}`,
+        req
+    );
 
     await Post.findByIdAndDelete(id);
 
@@ -193,6 +215,13 @@ export const upvotePost = asyncHandler(async (req, res) => {
         if (hasDownvoted) {
             post.downvotes = post.downvotes.filter(id => id.toString() !== userId.toString());
         }
+
+        await logActivity(
+            userId,
+            "upvote",
+            `${req.user.fullName} upvoted post`,
+            req
+        );
 
         // Create notification if not self-vote
         if (post.author._id.toString() !== userId.toString()) {
@@ -248,6 +277,13 @@ export const downvotePost = asyncHandler(async (req, res) => {
             post.upvotes = post.upvotes.filter(id => id.toString() !== userId.toString());
         }
 
+        await logActivity(
+            userId,
+            "downvote",
+            `${req.user.fullName} downvoted post`,
+            req
+        );
+
         // Create notification if not self-vote
         if (post.author._id.toString() !== userId.toString()) {
             notification = await Notification.create({
@@ -302,6 +338,13 @@ export const savePost = asyncHandler(async (req, res) => {
     user.savedPosts.push(id);
     await user.save();
 
+    await logActivity(
+        userId,
+        "save-post",
+        `${req.user.fullName} saved post`,
+        req
+    );
+
     res.status(200).json(new ApiResponse(200, null, "Post saved successfully"));
 });
 
@@ -328,6 +371,13 @@ export const unsavePost = asyncHandler(async (req, res) => {
     // Remove post from user's saved posts
     user.savedPosts = user.savedPosts.filter(savedPostId => savedPostId.toString() !== id);
     await user.save();
+
+    await logActivity(
+        userId,
+        "unsave-post",
+        `${req.user.fullName} unsaved post`,
+        req
+    );
 
     res.status(200).json(new ApiResponse(200, null, "Post unsaved successfully"));
 });

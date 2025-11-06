@@ -11,6 +11,7 @@ import crypto from "crypto"
 import { User } from "../models/user.model.js";
 import { destroyOnCloudinary, uploadOnCloudinary } from "../utils/cloudinary.utils.js";
 import { cloudinaryAvatarRefer } from "../utils/constants.utils.js";
+import { logActivity } from "../utils/logActivity.utils.js";
 
 
 // *================================================================================
@@ -126,6 +127,13 @@ const adminUpdateUserProfile = asyncHandler(async (req, res, next) => {
         return next(new ErrorHandler("User not found", 404));
     }
 
+    await logActivity(
+        req.user._id,
+        "admin-update-profile",
+        `Admin ${req.user.fullName} updated profile for ${updatedUser.fullName}`,
+        req
+    );
+
     return res.status(200).json({
         success: true,
         message: "Profile updated successfully",
@@ -183,6 +191,13 @@ const adminUpdateUserAvatar = asyncHandler(async (req, res, next) => {
         { new: true }
     ).select("-password")
 
+    await logActivity(
+        req.user._id,
+        "admin-update-avatar",
+        `Admin ${req.user.fullName} updated avatar for ${updatedUser.fullName}`,
+        req
+    );
+
     console.log("NEW URL: ", newAvatar);
     console.log("NEW URL: ", updatedUser.avatar);
     console.log("Updated User Avatar URL:", updatedUser.avatar.secure_url);
@@ -208,6 +223,13 @@ const adminDeleteUser = asyncHandler(async (req, res, next) => {
             return next(new ErrorHandler("User Not Found", 404))
 
         }
+
+        await logActivity(
+            req.user._id,
+            "admin-delete-user",
+            `Admin ${req.user.fullName} deleted user ${user.fullName}`,
+            req
+        );
 
         // *Delete the previous file
         // ----------------------------------------------------------------

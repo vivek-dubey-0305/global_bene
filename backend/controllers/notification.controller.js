@@ -2,6 +2,7 @@ import { asyncHandler } from "../middlewares/asyncHandler.middleware.js";
 import { Notification } from "../models/notification.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { logActivity } from "../utils/logActivity.utils.js";
 
 // Get notifications for user
 export const getUserNotifications = asyncHandler(async (req, res) => {
@@ -44,6 +45,13 @@ export const markNotificationAsRead = asyncHandler(async (req, res) => {
     notification.isRead = true;
     await notification.save();
 
+    await logActivity(
+        userId,
+        "read-notification",
+        `${req.user.fullName} marked notification as read`,
+        req
+    );
+
     res.status(200).json(new ApiResponse(200, notification, "Notification marked as read"));
 });
 
@@ -65,6 +73,13 @@ export const deleteNotification = asyncHandler(async (req, res) => {
     if (!notification) {
         throw new ApiError(404, "Notification not found");
     }
+
+    await logActivity(
+        userId,
+        "delete-notification",
+        `${req.user.fullName} deleted notification`,
+        req
+    );
 
     res.status(200).json(new ApiResponse(200, null, "Notification deleted successfully"));
 });

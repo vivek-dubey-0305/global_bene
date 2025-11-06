@@ -4,6 +4,7 @@ import { Post } from "../models/post.model.js";
 import { Notification } from "../models/notification.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { logActivity } from "../utils/logActivity.utils.js";
 
 // Create a new comment
 export const createComment = asyncHandler(async (req, res) => {
@@ -46,6 +47,13 @@ export const createComment = asyncHandler(async (req, res) => {
 
     await comment.populate('author', 'fullName avatar');
     await comment.populate('post', 'title');
+
+    await logActivity(
+        author,
+        "reply",
+        `${req.user.fullName} created a comment`,
+        req
+    );
 
     // Create notification for post author if not self-comment
     if (post.author.toString() !== author.toString()) {
@@ -171,6 +179,13 @@ export const updateComment = asyncHandler(async (req, res) => {
 
     await comment.populate('author', 'fullName avatar');
 
+    await logActivity(
+        userId,
+        "update-reply",
+        `${req.user.fullName} updated comment`,
+        req
+    );
+
     res.status(200).json(new ApiResponse(200, comment, "Comment updated successfully"));
 });
 
@@ -190,6 +205,13 @@ export const deleteComment = asyncHandler(async (req, res) => {
     if (!isAuthor && !isModerator) {
         throw new ApiError(403, "Only author or moderator can delete comment");
     }
+
+    await logActivity(
+        userId,
+        "delete-reply",
+        `${req.user.fullName} deleted comment`,
+        req
+    );
 
     // Update counts
     const post = await Post.findById(comment.post);
@@ -228,6 +250,13 @@ export const upvoteComment = asyncHandler(async (req, res) => {
         if (hasDownvoted) {
             comment.downvotes = comment.downvotes.filter(id => id.toString() !== userId.toString());
         }
+
+        await logActivity(
+            userId,
+            "upvote",
+            `${req.user.fullName} upvoted comment`,
+            req
+        );
 
         // Create notification if not self-vote
         if (comment.author._id.toString() !== userId.toString()) {
@@ -281,6 +310,13 @@ export const downvoteComment = asyncHandler(async (req, res) => {
         if (hasUpvoted) {
             comment.upvotes = comment.upvotes.filter(id => id.toString() !== userId.toString());
         }
+
+        await logActivity(
+            userId,
+            "downvote",
+            `${req.user.fullName} downvoted comment`,
+            req
+        );
 
         // Create notification if not self-vote
         if (comment.author._id.toString() !== userId.toString()) {

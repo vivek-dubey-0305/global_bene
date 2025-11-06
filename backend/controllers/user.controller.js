@@ -11,6 +11,7 @@ import mongoose from "mongoose";
 import { sendEmail } from "../utils/mail.utils.js";
 import { cookieToken } from "../utils/cookie.utils.js";
 import { cloudinaryAvatarRefer } from "../utils/constants.utils.js";
+import { logActivity } from "../utils/logActivity.utils.js";
 
 // *==================================Email Templates & Link==============================================
 function generateEmailLinkTemplate(Token) {
@@ -140,6 +141,12 @@ const registerUser = asyncHandler(async (req, res, next) => {
             gender: gender || 'not specified'
         })
         await cookieToken(user, res)
+        await logActivity(
+            user._id,
+            "register",
+            `${user.fullName} registered`,
+            req
+        );
     } catch (error) {
         console.error("User creation error:", error);
         if (error instanceof mongoose.Error.ValidationError) {
@@ -168,6 +175,12 @@ const loginUser = asyncHandler(async (req, res, next) => {
         if (!isPasswordValid) return next(new ErrorHandler("Invalid credentials", 400))
 
         cookieToken(user, res)
+        await logActivity(
+            user._id,
+            "login",
+            `${user.fullName} logged in`,
+            req
+        );
     } catch (error) {
         return next(new ErrorHandler(`Something went wrong..details - ${error.message}`, 500))
     }
@@ -191,8 +204,14 @@ const logoutUser = asyncHandler(async (req, res, next) => {
                 {
                     new: true
                 }
-            )
+            ).select("fullName");
      
+            await logActivity(
+                req.user._id,
+                "logout",
+                `${user.fullName} logged out`,
+                req
+            );
         } catch (error) {
         }
 
@@ -285,6 +304,13 @@ const verifyOtpForUser = asyncHandler(async (req, res, next) => {
     user.verificationCodeExpire = undefined;
 
     await user.save({ validateBeforeSave: false });
+
+    await logActivity(
+        user._id,
+        "verify-otp",
+        `${user.fullName} verified OTP`,
+        req
+    );
 
     const options = {
         httpOnly: true,
@@ -390,6 +416,12 @@ const resetPassword = asyncHandler(async (req, res, next) => {
 
     await user.save({ validateBeforeSave: true });
 
+    await logActivity(
+        user._id,
+        "reset-password",
+        `${user.fullName} reset password`,
+        req
+    );
 
     return res.status(200).
         json({
@@ -429,6 +461,12 @@ const changeCurrentPassword = asyncHandler(async (req, res, next) => {
     user.password = newPassword;
     await user.save({ validateBeforeSave: false });
 
+    await logActivity(
+        req.user._id,
+        "change-password",
+        `${user.fullName} changed password`,
+        req
+    );
 
     return res.status(200).json({
         success: true,
@@ -569,6 +607,13 @@ const updateUserAvatar = asyncHandler(async (req, res, next) => {
             { new: true }
         ).select("-password")
 
+        await logActivity(
+            req.user._id,
+            "avatar",
+            `${updatedUser.fullName} updated avatar`,
+            req
+        );
+
         return res
             .status(200)
             .json({
@@ -661,6 +706,13 @@ const deleteUser = asyncHandler(async (req, res, next) => {
             return next(new ErrorHandler("User Not Found", 404))
 
         }
+
+        await logActivity(
+            req.user._id,
+            "delete-user",
+            `${user.fullName} deleted account`,
+            req
+        );
 
         // Delete the user
         await User.findByIdAndDelete(userId);

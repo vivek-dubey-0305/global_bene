@@ -5,6 +5,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.utils.js";
 import { cloudinaryCommunityRefer } from "../utils/constants.utils.js";
+import { logActivity } from "../utils/logActivity.utils.js";
 
 // Create a new community
 export const createCommunity = asyncHandler(async (req, res) => {
@@ -63,6 +64,13 @@ const community = await Community.create({
     await community.populate('members', 'fullName avatar');
     await community.populate('moderators', 'fullName avatar');
 
+    await logActivity(
+        creator,
+        "community",
+        `${req.user.fullName} created community: ${name}`,
+        req
+    );
+
     res.status(201).json(new ApiResponse(201, community, "Community created successfully"));
 });
 
@@ -109,6 +117,13 @@ export const joinCommunity = asyncHandler(async (req, res) => {
     community.memberCount = community.members.length;
     await community.save();
 
+    await logActivity(
+        userId,
+        "join-community",
+        `${req.user.fullName} joined community: ${community.name}`,
+        req
+    );
+
     // Populate members for consistent response
     await community.populate('members', 'fullName avatar');
 
@@ -132,6 +147,13 @@ export const leaveCommunity = asyncHandler(async (req, res) => {
     community.members = community.members.filter(member => member.toString() !== userId.toString());
     community.memberCount = community.members.length;
     await community.save();
+
+    await logActivity(
+        userId,
+        "leave-community",
+        `${req.user.fullName} left community: ${community.name}`,
+        req
+    );
 
     // Populate members for consistent response
     await community.populate('members', 'fullName avatar');
@@ -160,6 +182,13 @@ export const updateCommunity = asyncHandler(async (req, res) => {
 
     await community.save();
 
+    await logActivity(
+        userId,
+        "update-community",
+        `${req.user.fullName} updated community: ${community.name}`,
+        req
+    );
+
     res.status(200).json(new ApiResponse(200, community, "Community updated successfully"));
 });
 
@@ -176,6 +205,13 @@ export const deleteCommunity = asyncHandler(async (req, res) => {
     if (community.creator._id.toString() !== userId.toString()) {
         throw new ApiError(403, "Only creator can delete community");
     }
+
+    await logActivity(
+        userId,
+        "delete-community",
+        `${req.user.fullName} deleted community: ${community.name}`,
+        req
+    );
 
     await Community.findByIdAndDelete(id);
 
