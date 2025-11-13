@@ -21,14 +21,20 @@ export const getCommunityById = async (communityId) => {
   }
 };
 
+// Get community by name
+export const getCommunityByName = async (communityName) => {
+  try {
+    const response = await axiosInstance.get(`/communities/name/${communityName}`);
+    return response.data.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
 // Create community
 export const createCommunity = async (communityData) => {
   try {
-    const response = await axiosInstance.post('/communities', communityData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await axiosInstance.post('/communities', communityData);
     return response.data.data;
   } catch (error) {
     throw error.response?.data || error;

@@ -6,6 +6,7 @@ import {
     createCommunity,
     getAllCommunities,
     getCommunityById,
+    getCommunityByName,
     joinCommunity,
     leaveCommunity,
     updateCommunity,
@@ -15,10 +16,11 @@ import {
 const router = express.Router();
 
 // Configure multer for file uploads
-const upload = multer({ dest: 'public/temp/' });
+const upload = multer({ dest: '../public/temp/' });
 
 // Public routes
 router.route("/").get(getAllCommunities);
+router.route("/name/:name").get(getCommunityByName);
 router.route("/:id").get(getCommunityById);
 
 // Protected routes

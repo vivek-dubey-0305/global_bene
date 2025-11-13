@@ -33,7 +33,7 @@ const communitySchema = new Schema({
         },
         username: {
             type: String,
-            required: true
+            required: false
         },
         avatar: {
             public_id: String,

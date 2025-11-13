@@ -4,14 +4,7 @@ import axiosInstance from './axiosInstance';
 // Create a new post
 export const createPost = async (postData) => {
   try {
-    const config = {
-      headers: postData instanceof FormData ? {
-        'Content-Type': 'multipart/form-data',
-      } : {
-        'Content-Type': 'application/json',
-      }
-    };
-    const response = await axiosInstance.post('/posts', postData, config);
+    const response = await axiosInstance.post('/posts', postData);
     return response.data.data;
   } catch (error) {
     throw error.response?.data || error;
@@ -22,6 +15,18 @@ export const createPost = async (postData) => {
 export const getAllPosts = async (params = {}) => {
   try {
     const response = await axiosInstance.get('/posts', { params });
+    return response.data.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+// Get posts by community
+export const getPostsByCommunity = async (communityId, params = {}) => {
+  try {
+    const response = await axiosInstance.get('/posts', { 
+      params: { communityId, ...params }
+    });
     return response.data.data;
   } catch (error) {
     throw error.response?.data || error;

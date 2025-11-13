@@ -80,6 +80,7 @@ const ProfilePage = () => {
   }, [activeTab, user]);
 
   const getInitials = (name) => {
+    if (!name) return 'U';
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
@@ -202,7 +203,7 @@ const ProfilePage = () => {
               className="flex flex-col md:flex-row items-start md:items-center gap-6"
             >
               <Avatar className="w-24 h-24 md:w-32 md:h-32">
-                <AvatarImage src={user.avatar?.secure_url} alt={user.username} />
+                <AvatarImage src={user.avatar?.secure_url} alt={user.username || 'User'} />
                 <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
                   {getInitials(user.username)}
                 </AvatarFallback>
@@ -212,9 +213,9 @@ const ProfilePage = () => {
                 <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4">
                   <div>
                     <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-                      {user.username}
+                      {user.username || 'User'}
                     </h1>
-                    <p className="text-muted-foreground">@{user.username.toLowerCase().replace(' ', '')}</p>
+                    <p className="text-muted-foreground">@{user.username?.toLowerCase().replace(' ', '') || user.email?.split('@')[0] || 'user'}</p>
                   </div>
 
                   <div className="flex items-center gap-2">

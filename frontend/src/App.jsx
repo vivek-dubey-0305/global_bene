@@ -20,6 +20,7 @@ import AboutPage from '@/pages/publicPages/AboutPage';
 import ContactPage from '@/pages/publicPages/ContactPage';
 import PrivacyPolicyPage from '@/pages/publicPages/PrivacyPolicyPage';
 import TermsConditionPage from '@/pages/publicPages/TermsConditionPage';
+import CommunityPage from '@/pages/publicPages/CommunityPage';
 
 const App = () => {
   return (
@@ -44,6 +45,7 @@ const App = () => {
           <Route path="/help" element={<ContactPage />} />
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
           <Route path="/terms" element={<TermsConditionPage />} />
+          <Route path="/r/:communityName" element={<CommunityPage />} />
           {/* Add more routes as needed */}
         </Routes>
       </div>

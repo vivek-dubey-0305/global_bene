@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import {
   createPost as createPostApi,
   getAllPosts as getAllPostsApi,
+  getPostsByCommunity as getPostsByCommunityApi,
   getPostById as getPostByIdApi,
   updatePost as updatePostApi,
   deletePost as deletePostApi,
@@ -31,6 +32,18 @@ export const fetchPosts = createAsyncThunk(
   async (params = {}, { rejectWithValue }) => {
     try {
       const response = await getAllPostsApi(params);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch posts');
+    }
+  }
+);
+
+export const fetchPostsByCommunity = createAsyncThunk(
+  'post/fetchPostsByCommunity',
+  async ({ communityId, params = {} }, { rejectWithValue }) => {
+    try {
+      const response = await getPostsByCommunityApi(communityId, params);
       return response;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch posts');
@@ -152,11 +165,17 @@ const postSlice = createSlice({
   name: 'post',
   initialState: {
     posts: [],
+    communityPosts: [],
     savedPosts: [],
     currentPost: null,
     loading: false,
     error: null,
     pagination: {
+      currentPage: 1,
+      totalPages: 1,
+      totalPosts: 0
+    },
+    communityPagination: {
       currentPage: 1,
       totalPages: 1,
       totalPosts: 0
@@ -256,6 +275,30 @@ const postSlice = createSlice({
         };
       })
       .addCase(fetchPosts.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Fetch posts by community
+      .addCase(fetchPostsByCommunity.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchPostsByCommunity.fulfilled, (state, action) => {
+        state.loading = false;
+        // If it's page 1, replace, otherwise append
+        const currentPage = action.payload.currentPage || 1;
+        if (currentPage === 1) {
+          state.communityPosts = action.payload.posts || [];
+        } else {
+          state.communityPosts = [...state.communityPosts, ...(action.payload.posts || [])];
+        }
+        state.communityPagination = {
+          currentPage: action.payload.currentPage || 1,
+          totalPages: action.payload.totalPages || 1,
+          totalPosts: action.payload.totalPosts || 0
+        };
+      })
+      .addCase(fetchPostsByCommunity.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })

@@ -6,27 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { X, Upload, Image as ImageIcon, AlertCircle, CheckCircle } from 'lucide-react';
-
-const categories = [
-  'Technology',
-  'Gaming',
-  'Science',
-  'Art & Design',
-  'Health & Fitness',
-  'Food & Cooking',
-  'Travel',
-  'Sports',
-  'Music',
-  'Movies & TV',
-  'Books',
-  'Politics',
-  'Business',
-  'Education',
-  'Other'
-];
 
 const CreateCommunityModal = ({ isOpen, onClose, onCreate }) => {
   const dispatch = useDispatch();
@@ -35,15 +15,16 @@ const CreateCommunityModal = ({ isOpen, onClose, onCreate }) => {
     name: '',
     displayName: '',
     description: '',
-    category: '',
     isPrivate: false,
     allowImages: true,
-    allowVideos: true
+    allowVideos: true,
+    rules: []
   });
 
   const [errors, setErrors] = useState({});
   const [bannerPreview, setBannerPreview] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
+  const [currentRule, setCurrentRule] = useState({ title: '', description: '' });
 
   const validateForm = () => {
     const newErrors = {};
@@ -68,10 +49,6 @@ const CreateCommunityModal = ({ isOpen, onClose, onCreate }) => {
       newErrors.description = 'Description is required';
     } else if (formData.description.length > 500) {
       newErrors.description = 'Description must be less than 500 characters';
-    }
-
-    if (!formData.category) {
-      newErrors.category = 'Please select a category';
     }
 
     setErrors(newErrors);
@@ -100,6 +77,23 @@ const CreateCommunityModal = ({ isOpen, onClose, onCreate }) => {
     }
   };
 
+  const handleAddRule = () => {
+    if (currentRule.title.trim() && currentRule.description.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        rules: [...prev.rules, { ...currentRule }]
+      }));
+      setCurrentRule({ title: '', description: '' });
+    }
+  };
+
+  const handleRemoveRule = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      rules: prev.rules.filter((_, i) => i !== index)
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -115,6 +109,7 @@ const CreateCommunityModal = ({ isOpen, onClose, onCreate }) => {
     formDataToSend.append('title', formData.displayName);
     formDataToSend.append('name', formData.name);
     formDataToSend.append('description', formData.description);
+    formDataToSend.append('rules', JSON.stringify(formData.rules));
 
     // Add avatar file if selected
     if (avatarPreview && document.getElementById('avatar-upload').files[0]) {
@@ -149,14 +144,15 @@ const CreateCommunityModal = ({ isOpen, onClose, onCreate }) => {
         name: '',
         displayName: '',
         description: '',
-        category: '',
         isPrivate: false,
         allowImages: true,
-        allowVideos: true
+        allowVideos: true,
+        rules: []
       });
       setBannerPreview(null);
       setAvatarPreview(null);
       setErrors({});
+      setCurrentRule({ title: '', description: '' });
       // Clear Redux errors
       dispatch(clearError());
     }
@@ -280,29 +276,69 @@ const CreateCommunityModal = ({ isOpen, onClose, onCreate }) => {
                 </div>
               </div>
 
-              {/* Category */}
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold">Category *</Label>
-                <Select
-                  value={formData.category}
-                  onValueChange={(value) => handleInputChange('category', value)}
-                  disabled={createLoading}
-                >
-                  <SelectTrigger className={errors.category ? 'border-red-500' : ''}>
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map(category => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
+              {/* Community Rules */}
+              <div className="space-y-4">
+                <Label className="text-sm font-semibold">Community Rules (Optional)</Label>
+                
+                {/* Add Rule Form */}
+                <div className="space-y-3 p-4 border rounded-lg bg-muted/50">
+                  <div className="space-y-2">
+                    <Label htmlFor="rule-title" className="text-xs text-muted-foreground">Rule Title</Label>
+                    <Input
+                      id="rule-title"
+                      placeholder="e.g., Be Respectful"
+                      value={currentRule.title}
+                      onChange={(e) => setCurrentRule(prev => ({ ...prev, title: e.target.value }))}
+                      disabled={createLoading}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="rule-description" className="text-xs text-muted-foreground">Rule Description</Label>
+                    <Textarea
+                      id="rule-description"
+                      placeholder="Explain what this rule means and why it's important..."
+                      value={currentRule.description}
+                      onChange={(e) => setCurrentRule(prev => ({ ...prev, description: e.target.value }))}
+                      className="min-h-16"
+                      disabled={createLoading}
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAddRule}
+                    disabled={!currentRule.title.trim() || !currentRule.description.trim() || createLoading}
+                  >
+                    Add Rule
+                  </Button>
+                </div>
+
+                {/* Rules List */}
+                {formData.rules.length > 0 && (
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Added Rules:</Label>
+                    {formData.rules.map((rule, index) => (
+                      <div key={index} className="flex items-start gap-3 p-3 border rounded-lg bg-card">
+                        <div className="shrink-0 w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center text-sm font-medium text-primary">
+                          {index + 1}
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-medium text-sm">{rule.title}</h4>
+                          <p className="text-xs text-muted-foreground">{rule.description}</p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveRule(index)}
+                          disabled={createLoading}
+                          className="shrink-0 h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                        >
+                          ×
+                        </Button>
+                      </div>
                     ))}
-                  </SelectContent>
-                </Select>
-                {errors.category && (
-                  <div className="flex items-center gap-1 text-red-500 text-sm">
-                    <AlertCircle className="h-4 w-4" />
-                    {errors.category}
                   </div>
                 )}
               </div>

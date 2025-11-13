@@ -3,6 +3,7 @@ import {
   createCommunity as createCommunityApi,
   getAllCommunities as getAllCommunitiesApi,
   getCommunityById as getCommunityByIdApi,
+  getCommunityByName as getCommunityByNameApi,
   joinCommunity as joinCommunityApi,
   leaveCommunity as leaveCommunityApi,
   updateCommunity as updateCommunityApi,
@@ -39,6 +40,18 @@ export const getCommunityById = createAsyncThunk(
   async (communityId, { rejectWithValue }) => {
     try {
       const response = await getCommunityByIdApi(communityId);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch community');
+    }
+  }
+);
+
+export const getCommunityByName = createAsyncThunk(
+  'community/getCommunityByName',
+  async (communityName, { rejectWithValue }) => {
+    try {
+      const response = await getCommunityByNameApi(communityName);
       return response;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch community');
@@ -163,6 +176,19 @@ const communitySlice = createSlice({
         state.currentCommunity = action.payload;
       })
       .addCase(getCommunityById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Get Community By Name
+      .addCase(getCommunityByName.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getCommunityByName.fulfilled, (state, action) => {
+        state.loading = false;
+        state.currentCommunity = action.payload;
+      })
+      .addCase(getCommunityByName.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })

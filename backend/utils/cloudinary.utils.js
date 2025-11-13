@@ -22,8 +22,8 @@ const uploadOnCloudinary = async (localFilePath, refer = "", user = null, origin
         // ✅ build custom filename
         let publicId = path.parse(originalName).name; // default: original file name (without ext)
         let folder, resource_type;
-        if (user?.fullName) {
-            const safeName = user.fullName.replace(/\s+/g, "-"); // sanitize spaces
+        if (user?.username) {
+            const safeName = user.username.replace(/\s+/g, "-"); // sanitize spaces
             const ext = path.extname(originalName);  // .png
             if (refer === cloudinaryAvatarRefer) {
                 publicId = `${safeName}-avatar`;

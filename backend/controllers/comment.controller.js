@@ -2,6 +2,7 @@ import { asyncHandler } from "../middlewares/asyncHandler.middleware.js";
 import { Comment } from "../models/comment.model.js";
 import { Post } from "../models/post.model.js";
 import { Notification } from "../models/notification.model.js";
+import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { logActivity } from "../utils/logActivity.utils.js";
@@ -20,11 +21,10 @@ export const createComment = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Post not found");
     }
 
+    let path = `${postId}`;
     if (parentCommentId) {
         const parentComment = await Comment.findById(parentCommentId);
-        if (!parentComment) {
-            throw new ApiError(404, "Parent comment not found");
-        }
+        path = `${parentComment.path}`;
     }
 
     const comment = await Comment.create({
@@ -32,11 +32,11 @@ export const createComment = asyncHandler(async (req, res) => {
         author_id: author,
         post_id: postId,
         parent_id: parentCommentId || null,
-        path: `${postId}/${comment._id}` // Will be set after creation
+        path: `${path}/temp` // Temporary path
     });
 
-    // Set path after _id is available
-    comment.path = `${postId}/${comment._id}`;
+    // Set correct path after _id is available
+    comment.path = `${path}/${comment._id}`;
     await comment.save();
 
     // Update num_comments on post
@@ -297,7 +297,7 @@ export const upvoteComment = asyncHandler(async (req, res) => {
     }
 
     // Calculate score
-    comment.score = Math.floor((comment.upvotes.length - comment.downvotes.length) / 2);
+    comment.score = comment.upvotes.length - comment.downvotes.length;
 
     await comment.save();
     await comment.populate('upvotes', 'username');
@@ -362,7 +362,7 @@ export const downvoteComment = asyncHandler(async (req, res) => {
     }
 
     // Calculate score
-    comment.score = Math.floor((comment.upvotes.length - comment.downvotes.length) / 2);
+    comment.score = comment.upvotes.length - comment.downvotes.length;
 
     await comment.save();
     await comment.populate('upvotes', 'username');

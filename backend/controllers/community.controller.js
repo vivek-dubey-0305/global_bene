@@ -9,7 +9,10 @@ import { logActivity } from "../utils/logActivity.utils.js";
 
 // Create a new community
 export const createCommunity = asyncHandler(async (req, res) => {
-    const { title, description, name } = req.body;
+    console.log("req.body:", req.body);
+    console.log("req.files:", req.files);
+    console.log("req.user:", req.user);
+    const { title, description, name, rules } = req.body;
     const creator = req.user._id;
 
     if (!title || !description) {
@@ -24,6 +27,7 @@ export const createCommunity = asyncHandler(async (req, res) => {
             { name: communityName.toLowerCase() }
         ]
     });
+    console.log("existingCommunity:", existingCommunity);
     if (existingCommunity) {
         throw new ApiError(400, "Community with this title or name already exists");
     }
@@ -54,6 +58,16 @@ export const createCommunity = asyncHandler(async (req, res) => {
         }
     }
 
+    // Parse rules if provided
+    let parsedRules = [];
+    if (rules) {
+        try {
+            parsedRules = JSON.parse(rules);
+        } catch (error) {
+            console.log("Error parsing rules:", error);
+        }
+    }
+
 // In createCommunity
 const community = await Community.create({
     name: communityName.toLowerCase(),
@@ -61,13 +75,14 @@ const community = await Community.create({
     description,
     creator_id: {
         _id: creator,
-        username: req.user.username,
+        username: req.user.username || req.user.email?.split('@')[0] || 'User',
         avatar: req.user.avatar
     },
     members: [creator],
     moderators: [creator],
     avatar,
     banner,
+    rules: parsedRules,
     members_count: 1
 });
 
@@ -104,6 +119,21 @@ export const getCommunityById = asyncHandler(async (req, res) => {
     const { id } = req.params;
 
     const community = await Community.findById(id)
+        .populate('members', 'username avatar')
+        .populate('moderators', 'username avatar');
+
+    if (!community) {
+        throw new ApiError(404, "Community not found");
+    }
+
+    res.status(200).json(new ApiResponse(200, community, "Community fetched successfully"));
+});
+
+// Get community by name
+export const getCommunityByName = asyncHandler(async (req, res) => {
+    const { name } = req.params;
+
+    const community = await Community.findOne({ name: name.toLowerCase() })
         .populate('members', 'username avatar')
         .populate('moderators', 'username avatar');
 
@@ -186,7 +216,7 @@ export const leaveCommunity = asyncHandler(async (req, res) => {
     res.status(200).json(new ApiResponse(200, community, "Left community successfully"));
 });
 
-// Update community (only moderators)
+// Update community (only creator)
 export const updateCommunity = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { description, rules, is_private } = req.body;
@@ -197,8 +227,8 @@ export const updateCommunity = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Community not found");
     }
 
-    if (!community.moderators.includes(userId)) {
-        throw new ApiError(403, "Only moderators can update community");
+    if (community.creator_id._id.toString() !== userId.toString()) {
+        throw new ApiError(403, "Only creator can update community");
     }
 
     community.description = description || community.description;

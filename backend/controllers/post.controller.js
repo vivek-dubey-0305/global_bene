@@ -11,6 +11,9 @@ import { logActivity } from "../utils/logActivity.utils.js";
 
 // Create a new post
 export const createPost = asyncHandler(async (req, res) => {
+    console.log("req.body:", req.body);
+    console.log("req.file:", req.file);
+    console.log("req.user:", req.user);
     const { title, body, communityId, type, url, tags } = req.body;
     const author = req.user._id;
 
@@ -24,11 +27,12 @@ export const createPost = asyncHandler(async (req, res) => {
     }
 
     const community = await Community.findById(communityId);
+    console.log("community:", community);
     if (!community) {
         throw new ApiError(404, "Community not found");
     }
 
-    if (!community.members.includes(author)) {
+    if (!community.members.some(member => member && member.toString() === author.toString())) {
         throw new ApiError(403, "You must be a member of the community to post");
     }
 
@@ -47,7 +51,7 @@ export const createPost = asyncHandler(async (req, res) => {
     const post = await Post.create({
         title,
         body: body || "",
-        author_id,
+        author_id: author,
         community_id: communityId,
         type: type || "text",
         media,
@@ -61,7 +65,7 @@ export const createPost = asyncHandler(async (req, res) => {
     await logActivity(
         author,
         "post",
-        `${req.user.username} created a post: ${title}`,
+        `${req.user.username || req.user.email?.split('@')[0] || 'User'} created a post: ${title}`,
         req,
         'post',
         post._id
@@ -261,7 +265,7 @@ export const upvotePost = asyncHandler(async (req, res) => {
     }
 
     // Calculate score
-    post.score = Math.floor((post.upvotes.length - post.downvotes.length) / 2);
+    post.score = post.upvotes.length - post.downvotes.length;
 
     await post.save();
     await post.populate('upvotes', 'username');
@@ -327,7 +331,7 @@ export const downvotePost = asyncHandler(async (req, res) => {
     }
 
     // Calculate score
-    post.score = Math.floor((post.upvotes.length - post.downvotes.length) / 2);
+    post.score = post.upvotes.length - post.downvotes.length;
 
     await post.save();
     await post.populate('upvotes', 'username');
