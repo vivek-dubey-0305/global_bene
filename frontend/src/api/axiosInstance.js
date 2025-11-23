@@ -11,14 +11,19 @@ const axiosInstance = axios.create({
 });
 
 // 🔄 Auto attach token
+let accessToken = null;
+
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("accessToken");
-    if (token) config.headers.Authorization = `Bearer ${token}`;
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
 );
+
 
 // 🔁 Handle token expiry (refresh logic) - FIXED: Only trigger for authenticated sessions
 axiosInstance.interceptors.response.use(
