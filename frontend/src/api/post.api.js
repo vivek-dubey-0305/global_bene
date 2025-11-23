@@ -24,10 +24,10 @@ export const getAllPosts = async (params = {}) => {
 };
 
 // Get posts by community
-export const getPostsByCommunity = async (communityId, params = {}) => {
+export const getPostsByCommunity = async (communityName, params = {}) => {
   try {
     const response = await axiosInstance.get('/posts', { 
-      params: { communityId, ...params }
+      params: { communityName, ...params }
     });
     return response.data.data;
   } catch (error) {

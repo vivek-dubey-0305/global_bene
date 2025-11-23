@@ -71,7 +71,7 @@ const CommunityPage = () => {
     if (currentCommunity && currentCommunity._id) {
       dispatch(clearCommunityPosts());
       dispatch(fetchPostsByCommunity({
-        communityId: currentCommunity._id,
+        communityName: communityName,
         params: { limit: 10, page: currentPage }
       }));
     }

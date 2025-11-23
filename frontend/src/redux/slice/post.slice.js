@@ -41,9 +41,9 @@ export const fetchPosts = createAsyncThunk(
 
 export const fetchPostsByCommunity = createAsyncThunk(
   'post/fetchPostsByCommunity',
-  async ({ communityId, params = {} }, { rejectWithValue }) => {
+  async ({ communityName, params = {} }, { rejectWithValue }) => {
     try {
-      const response = await getPostsByCommunityApi(communityId, params);
+      const response = await getPostsByCommunityApi(communityName, params);
       return response;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch posts');
@@ -293,13 +293,7 @@ const postSlice = createSlice({
       })
       .addCase(fetchPostsByCommunity.fulfilled, (state, action) => {
         state.loading = false;
-        // If it's page 1, replace, otherwise append
-        const currentPage = action.payload.currentPage || 1;
-        if (currentPage === 1) {
-          state.communityPosts = (action.payload.posts || []).filter(post => post && post._id);
-        } else {
-          state.communityPosts = [...state.communityPosts, ...(action.payload.posts || []).filter(post => post && post._id)];
-        }
+        state.communityPosts = (action.payload.posts || []).filter(post => post && post._id);
         state.communityPagination = {
           currentPage: action.payload.currentPage || 1,
           totalPages: action.payload.totalPages || 1,

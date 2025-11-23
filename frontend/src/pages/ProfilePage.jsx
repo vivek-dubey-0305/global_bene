@@ -240,7 +240,7 @@ const ProfilePage = () => {
               className="flex flex-col md:flex-row items-start md:items-center gap-6"
             >
               <Avatar className="w-24 h-24 md:w-32 md:h-32">
-                <AvatarImage src={user.avatar?.secure_url} alt={user.username || 'User'} />
+                <AvatarImage src={user.avatar?.secure_url} alt={user.username || 'User'} className="object-cover" />
                 <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
                   {getInitials(user.username)}
                 </AvatarFallback>

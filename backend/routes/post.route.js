@@ -15,6 +15,8 @@ import {
     unsavePost,
     getSavedPosts,
     getPostsByUser,
+    getRecommendedPosts,
+    getRecentPosts,
     reportPost
 } from "../controllers/post.controller.js";
 
@@ -22,7 +24,9 @@ const router = express.Router();
 
 // Public routes
 router.route("/").get(getAllPosts);
+router.route("/recent").get(getRecentPosts);
 router.route("/saved").get(verifyJWT, getSavedPosts);
+router.route("/recommended").get(verifyJWT, getRecommendedPosts);
 router.route("/user/:userId").get(getPostsByUser);
 router.route("/:id").get(getPostById);
 

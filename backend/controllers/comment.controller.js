@@ -28,6 +28,7 @@ export const createComment = asyncHandler(async (req, res) => {
         path = `${parentComment.path}`;
     }
     console.log("Report:", req.newReport ? req.newReport.label : 'safe');
+
     const comment = await Comment.create({
         body,
         author_id: author,

@@ -221,9 +221,7 @@ const ProfileSettings = ({ user, onUpdate, onAvatarUpdate }) => {
     }
   };
 
-  const handlePasswordSubmit = async (e) => {
-    e.preventDefault();
-
+  const handlePasswordSubmit = async () => {
     if (!validatePasswordForm()) return;
 
     setPasswordLoading(true);
@@ -233,7 +231,8 @@ const ProfileSettings = ({ user, onUpdate, onAvatarUpdate }) => {
     try {
       await dispatch(changeUserPassword({
         currentPassword: passwordData.currentPassword,
-        newPassword: passwordData.newPassword
+        newPassword: passwordData.newPassword,
+        confirmPassword: passwordData.confirmPassword
       })).unwrap();
       setSuccess('Password changed successfully!');
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
@@ -316,7 +315,7 @@ const ProfileSettings = ({ user, onUpdate, onAvatarUpdate }) => {
           <div className="flex items-center gap-6">
             <div className="relative">
               <Avatar className="w-20 h-20">
-                <AvatarImage src={user?.avatar?.secure_url} alt={user?.username} />
+                <AvatarImage src={user?.avatar?.secure_url} alt={user?.username} className="object-cover" />
                 <AvatarFallback className="text-xl bg-primary text-primary-foreground">
                   {getInitials(user?.username || '')}
                 </AvatarFallback>
@@ -552,7 +551,7 @@ const ProfileSettings = ({ user, onUpdate, onAvatarUpdate }) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handlePasswordSubmit} className="space-y-4">
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="currentPassword">Current Password</Label>
               <div className="relative">
@@ -625,7 +624,8 @@ const ProfileSettings = ({ user, onUpdate, onAvatarUpdate }) => {
             </div>
 
             <Button
-              type="submit"
+              type="button"
+              onClick={handlePasswordSubmit}
               variant="outline"
               disabled={passwordLoading}
             >
@@ -638,7 +638,7 @@ const ProfileSettings = ({ user, onUpdate, onAvatarUpdate }) => {
                 'Change Password'
               )}
             </Button>
-          </form>
+          </div>
         </CardContent>
       </Card>
     </div>

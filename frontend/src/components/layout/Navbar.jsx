@@ -105,25 +105,9 @@ const Navbar = ({ user, notificationsCount = 0 }) => {
               )}
             </motion.button>
 
-            {/* Home */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => navigate('/')}
-              className="p-2 rounded-full hover:bg-muted transition-colors"
-            >
-              <Home className="h-5 w-5 text-muted-foreground" />
-            </motion.button>
 
-            {/* Trending */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => navigate('/trending')}
-              className="p-2 rounded-full hover:bg-muted transition-colors"
-            >
-              <TrendingUp className="h-5 w-5 text-muted-foreground" />
-            </motion.button>
+
+
 
             {/* Create Post */}
             <motion.div whileHover={{ scale: 1.05 }}>
@@ -132,19 +116,11 @@ const Navbar = ({ user, notificationsCount = 0 }) => {
                 className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
               >
                 <Plus className="h-4 w-4 mr-1" />
-                Create
+                Post
               </Button>
             </motion.div>
 
-            {/* Messages */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => navigate('/messages')}
-              className="p-2 rounded-full hover:bg-muted transition-colors relative"
-            >
-              <MessageSquare className="h-5 w-5 text-muted-foreground" />
-            </motion.button>
+
 
             {/* Notifications */}
             <motion.button
@@ -173,7 +149,7 @@ const Navbar = ({ user, notificationsCount = 0 }) => {
                     className="flex items-center gap-2 p-1 rounded-full hover:bg-muted transition-colors"
                   >
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.avatar?.secure_url} />
+                      <AvatarImage src={user.avatar?.secure_url} className="object-cover" />
                       <AvatarFallback>{user.username?.[0]?.toUpperCase()}</AvatarFallback>
                     </Avatar>
                   </motion.button>
@@ -200,10 +176,7 @@ const Navbar = ({ user, notificationsCount = 0 }) => {
                       Admin Panel
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem onClick={() => navigate('/settings')}>
-                    <Settings className="mr-2 h-4 w-4" />
-                    Settings
-                  </DropdownMenuItem>
+
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
@@ -316,7 +289,7 @@ const Navbar = ({ user, notificationsCount = 0 }) => {
                 <div className="border-t pt-4 space-y-2">
                   <div className="flex items-center gap-3 p-2">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.avatar?.secure_url} />
+                      <AvatarImage src={user.avatar?.secure_url} className="object-cover" />
                       <AvatarFallback>{user.username?.[0]?.toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <div>

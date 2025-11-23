@@ -10,6 +10,7 @@ import { cloudinaryPostRefer } from "../utils/constants.utils.js";
 import { logActivity } from "../utils/logActivity.utils.js";
 import { Report } from "../models/report.model.js";
 import ErrorHandler from "../middlewares/error.middleware.js";
+import { getRecommendations, refreshRecommendations } from "../utils/recommendation.utils.js";
 // Create a new post
 export const createPost = asyncHandler(async (req, res) => {
     console.log("req.body:", req.body);
@@ -105,11 +106,24 @@ export const createPost = asyncHandler(async (req, res) => {
 
 // Get all posts (with pagination and filtering)
 export const getAllPosts = asyncHandler(async (req, res) => {
-    const { page = 1, limit = 10, communityId, sortBy = "createdAt" } = req.query;
+    const { page = 1, limit = 10, communityName, sortBy = "createdAt", includeFlagged = false } = req.query;
 
     const filter = {};
-    if (communityId) {
-        filter.community_id = communityId;
+    if (!includeFlagged) {
+        filter.status = 'active';
+    }
+    if (communityName) {
+        const community = await Community.findOne({ name: communityName.toLowerCase() });
+        if (community) {
+            filter.community_id = community._id;
+        } else {
+            return res.status(200).json(new ApiResponse(200, {
+                posts: [],
+                totalPages: 0,
+                currentPage: page,
+                totalPosts: 0
+            }, "Posts fetched successfully"));
+        }
     }
 
     const posts = await Post.find(filter)
@@ -316,6 +330,9 @@ export const upvotePost = asyncHandler(async (req, res) => {
                 relatedPost: id
             });
         }
+
+        // Refresh recommendations after upvote
+        await refreshRecommendations(userId);
     }
 
     // Calculate score
@@ -382,6 +399,9 @@ export const downvotePost = asyncHandler(async (req, res) => {
                 relatedPost: id
             });
         }
+
+        // Refresh recommendations after downvote
+        await refreshRecommendations(userId);
     }
 
     // Calculate score
@@ -430,6 +450,9 @@ export const savePost = asyncHandler(async (req, res) => {
     user.savedPosts.push(id);
     await user.save();
 
+    // Refresh recommendations after saving
+    await refreshRecommendations(userId);
+
     await logActivity(
         userId,
         "save-post",
@@ -465,6 +488,9 @@ export const unsavePost = asyncHandler(async (req, res) => {
     // Remove post from user's saved posts
     user.savedPosts = user.savedPosts.filter(savedPostId => savedPostId.toString() !== id);
     await user.save();
+
+    // Refresh recommendations after unsaving
+    await refreshRecommendations(userId);
 
     await logActivity(
         userId,
@@ -514,6 +540,63 @@ export const getSavedPosts = asyncHandler(async (req, res) => {
         currentPage: page,
         totalPosts
     }, "Saved posts fetched successfully"));
+});
+
+// Get recommended posts for the authenticated user
+export const getRecommendedPosts = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+
+    const recommendedPostIds = await getRecommendations(userId);
+
+    if (recommendedPostIds.length === 0) {
+        return res.status(200).json(new ApiResponse(200, [], "No recommendations available"));
+    }
+
+    const posts = await Post.find({ _id: { $in: recommendedPostIds }, status: 'active' })
+        .populate('author_id', 'username avatar')
+        .populate('community_id', 'title members');
+
+    // Sort posts based on the order of recommendedPostIds (API returns ranked order)
+    const postMap = new Map(posts.map(post => [post._id.toString(), post]));
+    const sortedPosts = recommendedPostIds.map(id => postMap.get(id)).filter(Boolean);
+
+    res.status(200).json(new ApiResponse(200, sortedPosts, "Recommended posts fetched successfully"));
+});
+
+// Get recent posts (sorted by creation time)
+export const getRecentPosts = asyncHandler(async (req, res) => {
+    const { page = 1, limit = 10, communityName } = req.query;
+
+    const filter = { status: 'active' };
+    if (communityName) {
+        const community = await Community.findOne({ name: communityName.toLowerCase() });
+        if (community) {
+            filter.community_id = community._id;
+        } else {
+            return res.status(200).json(new ApiResponse(200, {
+                posts: [],
+                totalPages: 0,
+                currentPage: page,
+                totalPosts: 0
+            }, "Posts fetched successfully"));
+        }
+    }
+
+    const posts = await Post.find(filter)
+        .populate('author_id', 'username avatar')
+        .populate('community_id', 'title members')
+        .sort({ createdAt: -1 })
+        .limit(limit * 1)
+        .skip((page - 1) * limit);
+
+    const totalPosts = await Post.countDocuments(filter);
+
+    res.status(200).json(new ApiResponse(200, {
+        posts,
+        totalPages: Math.ceil(totalPosts / limit),
+        currentPage: page,
+        totalPosts
+    }, "Recent posts fetched successfully"));
 });
 
 // Report a post

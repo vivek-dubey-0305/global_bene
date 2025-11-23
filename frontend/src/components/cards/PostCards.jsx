@@ -213,7 +213,7 @@ const PostCard = ({ post, onUpvote, onDownvote, onComment }) => {
               <span>•</span>
               <span>Posted by</span>
               <Avatar className="h-4 w-4 sm:h-5 sm:w-5">
-                <AvatarImage src={author?.avatar?.secure_url} />
+                <AvatarImage src={author?.avatar?.secure_url} className="object-cover" />
                 <AvatarFallback>{author?.username?.[0]?.toUpperCase()}</AvatarFallback>
               </Avatar>
               <Link to={`/user/${author?._id}`} className="hover:text-orange-600 cursor-pointer transition-colors truncate">
