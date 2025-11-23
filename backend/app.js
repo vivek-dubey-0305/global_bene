@@ -14,6 +14,7 @@ import commentRouter from "./routes/comment.route.js"
 import notificationRouter from "./routes/notification.route.js"
 import activityLogRouter from "./routes/activityLog.route.js"
 import voteRouter from "./routes/vote.route.js"
+import searchRouter from "./routes/search.route.js"
 
 const app = express();
 config({ path: "./.env" })
@@ -66,6 +67,7 @@ app.use("/api/v1/comments", commentRouter)
 app.use("/api/v1/notifications", notificationRouter)
 app.use("/api/v1/activity-logs", activityLogRouter)
 app.use("/api/v1/votes", voteRouter)
+app.use("/api/v1/search", searchRouter)
 
 app.use(errorMiddleware)
 // *End-Of-Neccessary-Middlewares

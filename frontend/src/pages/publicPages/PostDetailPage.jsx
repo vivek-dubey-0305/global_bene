@@ -176,7 +176,7 @@ const PostDetailPage = () => {
 
         {/* Comments section */}
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Comments ({currentPost.commentsCount || 0})</h2>
+
 
           {/* New comment form */}
           <div className="border rounded-lg p-4 space-y-3">

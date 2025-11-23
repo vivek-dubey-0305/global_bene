@@ -47,7 +47,7 @@ const CommunityManagement = () => {
   };
 
   const handleViewCommunity = (communityName) => {
-    navigate(`/r/${communityName}`);
+    navigate(`/g/${communityName}`);
   };
 
   if (loading && communities.length === 0) {
@@ -135,7 +135,7 @@ const CommunityManagement = () => {
                           {community.title}
                         </h3>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                          r/{community.name} • Created by {community.creator_id?.username} • {formatDistanceToNow(new Date(community.createdAt), { addSuffix: true })}
+                          g/{community.name} • Created by {community.creator_id?.username} • {formatDistanceToNow(new Date(community.createdAt), { addSuffix: true })}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-500">
                           {community.members_count || 0} members

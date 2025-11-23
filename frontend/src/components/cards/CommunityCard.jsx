@@ -45,7 +45,7 @@ const CommunityCard = ({ community, onJoin, viewMode = 'grid' }) => {
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
                     <Link
-                      to={`/r/${community.name}`}
+                      to={`/g/${community.name}`}
                       className="text-lg font-bold hover:text-blue-600 transition-colors block truncate"
                     >
                       g/{community.title}
@@ -133,7 +133,7 @@ const CommunityCard = ({ community, onJoin, viewMode = 'grid' }) => {
             </Avatar>
             <div className="flex-1 min-w-0">
               <Link
-                to={`/r/${community.name}`}
+                to={`/g/${community.name}`}
                 className="font-bold hover:text-blue-600 transition-colors block truncate"
               >
                 g/{community.title}

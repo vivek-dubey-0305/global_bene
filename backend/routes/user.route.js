@@ -62,7 +62,7 @@ router.route("/:userId/unfollow").post(verifyJWT, unfollowUser)
 router.route("/:userId/followers").get(verifyJWT, getUserFollowers)
 router.route("/:userId/following").get(verifyJWT, getUserFollowing)
 router.route("/:userId/follow-status").get(verifyJWT, checkFollowStatus)
-router.route("/:userId").get(verifyJWT, getUserById)
+router.route("/:userId").get(getUserById)
 
 
 export default router;

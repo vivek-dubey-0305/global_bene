@@ -76,7 +76,7 @@ const Sidebar = ({ communities = [], userCommunities = [], onCreateCommunity }) 
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <Link
-                    to={`/r/${community.name}`}
+                    to={`/g/${community.name}`}
                     className="font-medium text-sm hover:text-blue-600 block truncate"
                   >
                     g/{community.name}
@@ -121,7 +121,7 @@ const Sidebar = ({ communities = [], userCommunities = [], onCreateCommunity }) 
                   transition={{ duration: 0.2, delay: index * 0.1 }}
                 >
                   <Link
-                    to={`/r/${community.name}`}
+                    to={`/g/${community.name}`}
                     className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted transition-colors"
                   >
                     <Avatar className="h-6 w-6">

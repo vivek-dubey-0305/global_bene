@@ -27,6 +27,7 @@ import CommunityManagement from '@/pages/adminPages/CommunityManagement';
 import SpamManagement from '@/pages/adminPages/SpamManagement';
 import CommunityPage from '@/pages/publicPages/CommunityPage';
 import UserProfilePage from '@/pages/publicPages/UserProfilePage';
+import SearchPage from '@/pages/SearchPage';
 
 const App = () => {
   return (
@@ -56,8 +57,9 @@ const App = () => {
           <Route path="/admin/posts" element={<ProtectedRoute requiredRole="admin"><PostManagement /></ProtectedRoute>} />
           <Route path="/admin/communities" element={<ProtectedRoute requiredRole="admin"><CommunityManagement /></ProtectedRoute>} />
           <Route path="/admin/spam" element={<ProtectedRoute requiredRole="admin"><SpamManagement /></ProtectedRoute>} />
-          <Route path="/r/:communityName" element={<CommunityPage />} />
+          <Route path="/g/:communityName" element={<CommunityPage />} />
           <Route path="/user/:userId" element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} />
+          <Route path="/search" element={<SearchPage />} />
           {/* Add more routes as needed */}
         </Routes>
       </div>

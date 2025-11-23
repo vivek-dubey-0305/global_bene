@@ -10,7 +10,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Loader } from '@/components/common/Loader';
 import { Badge } from '@/components/ui/badge';
-import { changeUserPassword } from '@/redux/slice/user.slice';
 import {
   User,
   Mail,
@@ -23,10 +22,7 @@ import {
   Linkedin,
   Camera,
   Save,
-  X,
-  Eye,
-  EyeOff,
-  Shield
+  X
 } from 'lucide-react';
 
 const ProfileSettings = ({ user, onUpdate, onAvatarUpdate }) => {
@@ -66,20 +62,7 @@ const ProfileSettings = ({ user, onUpdate, onAvatarUpdate }) => {
     });
   }, [user]);
 
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
-
-  const [showPasswords, setShowPasswords] = useState({
-    current: false,
-    new: false,
-    confirm: false
-  });
-
   const [loading, setLoading] = useState(false);
-  const [passwordLoading, setPasswordLoading] = useState(false);
   const [avatarLoading, setAvatarLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState('');
@@ -103,16 +86,6 @@ const ProfileSettings = ({ user, onUpdate, onAvatarUpdate }) => {
         [platform]: value
       }
     }));
-  };
-
-  const handlePasswordChange = (field, value) => {
-    setPasswordData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
-    }
   };
 
   const validateProfileForm = () => {
@@ -168,29 +141,6 @@ const ProfileSettings = ({ user, onUpdate, onAvatarUpdate }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const validatePasswordForm = () => {
-    const newErrors = {};
-
-    if (!passwordData.currentPassword) {
-      newErrors.currentPassword = 'Current password is required';
-    }
-
-    if (!passwordData.newPassword) {
-      newErrors.newPassword = 'New password is required';
-    } else if (passwordData.newPassword.length < 8) {
-      newErrors.newPassword = 'Password must be at least 8 characters';
-    }
-
-    if (!passwordData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your new password';
-    } else if (passwordData.newPassword !== passwordData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     await handleUpdate();
@@ -218,29 +168,6 @@ const ProfileSettings = ({ user, onUpdate, onAvatarUpdate }) => {
       setErrors({ general: error.message || 'Failed to update profile' });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handlePasswordSubmit = async () => {
-    if (!validatePasswordForm()) return;
-
-    setPasswordLoading(true);
-    setSuccess('');
-    setErrors({});
-
-    try {
-      await dispatch(changeUserPassword({
-        currentPassword: passwordData.currentPassword,
-        newPassword: passwordData.newPassword,
-        confirmPassword: passwordData.confirmPassword
-      })).unwrap();
-      setSuccess('Password changed successfully!');
-      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      setTimeout(() => setSuccess(''), 3000);
-    } catch (error) {
-      setErrors({ general: error.message || 'Failed to change password' });
-    } finally {
-      setPasswordLoading(false);
     }
   };
 
@@ -539,106 +466,6 @@ const ProfileSettings = ({ user, onUpdate, onAvatarUpdate }) => {
               </>
             )}
           </Button>
-        </CardContent>
-      </Card>
-
-      {/* Change Password */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="w-5 h-5" />
-            Change Password
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="currentPassword">Current Password</Label>
-              <div className="relative">
-                <Input
-                  id="currentPassword"
-                  type={showPasswords.current ? 'text' : 'password'}
-                  value={passwordData.currentPassword}
-                  onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
-                  className={`pr-10 ${errors.currentPassword ? 'border-red-500' : ''}`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPasswords(prev => ({ ...prev, current: !prev.current }))}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
-                >
-                  {showPasswords.current ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-              {errors.currentPassword && (
-                <p className="text-sm text-red-500">{errors.currentPassword}</p>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
-                <div className="relative">
-                  <Input
-                    id="newPassword"
-                    type={showPasswords.new ? 'text' : 'password'}
-                    value={passwordData.newPassword}
-                    onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
-                    className={`pr-10 ${errors.newPassword ? 'border-red-500' : ''}`}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPasswords(prev => ({ ...prev, new: !prev.new }))}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
-                  >
-                    {showPasswords.new ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-                {errors.newPassword && (
-                  <p className="text-sm text-red-500">{errors.newPassword}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                <div className="relative">
-                  <Input
-                    id="confirmPassword"
-                    type={showPasswords.confirm ? 'text' : 'password'}
-                    value={passwordData.confirmPassword}
-                    onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
-                    className={`pr-10 ${errors.confirmPassword ? 'border-red-500' : ''}`}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPasswords(prev => ({ ...prev, confirm: !prev.confirm }))}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
-                  >
-                    {showPasswords.confirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-                {errors.confirmPassword && (
-                  <p className="text-sm text-red-500">{errors.confirmPassword}</p>
-                )}
-              </div>
-            </div>
-
-            <Button
-              type="button"
-              onClick={handlePasswordSubmit}
-              variant="outline"
-              disabled={passwordLoading}
-            >
-              {passwordLoading ? (
-                <>
-                  <Loader size="sm" className="mr-2" />
-                  Changing...
-                </>
-              ) : (
-                'Change Password'
-              )}
-            </Button>
-          </div>
         </CardContent>
       </Card>
     </div>

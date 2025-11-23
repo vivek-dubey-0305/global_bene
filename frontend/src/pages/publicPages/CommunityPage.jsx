@@ -193,7 +193,7 @@ const CommunityPage = () => {
                   {displayCommunity.title}
                 </h1>
                 <p className="text-sm md:text-base opacity-90">
-                  r/{displayCommunity.name} • {displayCommunity.members_count} members
+                  g/{displayCommunity.name} • {displayCommunity.members_count} members
                 </p>
               </div>
             </div>
