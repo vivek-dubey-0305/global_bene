@@ -9,13 +9,13 @@ export const autoTaggerMiddleware = asyncHandler(async (req, res, next) => {
         if (!text) {
             return next(); // Skip if no text
         }
-        if (!process.env.AUTOTAGGER_SERVICE_API_KEY) {
-            console.log("AUTOTAGGER_SERVICE_API_KEY not set, skipping autotagging");
+        if (!process.env.AUTOTAGGER_SERVICE_URL) {
+            console.log("AUTOTAGGER_SERVICE_URL not set, skipping autotagging");
             return next(); // Skip if no API key
         }
 
         console.log("\n-------------\nAUTOTAGGER MIDDLEWARE");
-        const response = await axios.post(`${process.env.AUTOTAGGER_SERVICE_API_KEY}/predict`, { text });
+        const response = await axios.post(`${process.env.AUTOTAGGER_SERVICE_URL}/predict`, { text });
         const allTags = response.data.results?.[0].all_tags;
         if (!allTags) {
             console.log("No tags found\n", response.data);
