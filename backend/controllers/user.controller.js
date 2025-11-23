@@ -11,6 +11,7 @@ import mongoose from "mongoose";
 import { sendEmail } from "../utils/mail.utils.js";
 import { cookieToken } from "../utils/cookie.utils.js";
 import { cloudinaryAvatarRefer } from "../utils/constants.utils.js";
+import { logActivity } from "../utils/logActivity.utils.js";
 
 // *==================================Email Templates & Link==============================================
 function generateEmailLinkTemplate(Token) {
@@ -112,15 +113,18 @@ const refreshAccessToken = asyncHandler(async (req, res, next) => {
 
 // *Register Route
 const registerUser = asyncHandler(async (req, res, next) => {
-    const { fullName, email, phone, password } = req.body;
-    const requiredFields = [fullName, email, phone.toString(), password]
+    const { username, email, phone, password, gender } = req.body;
+    
+    console.log("Registration data received:", { username, email, phone, password: "***", gender });
+    
+    const requiredFields = [username, email, phone, password]
     const checkFields = { email, phone }
 
     if (requiredFields.some((field) => !field || field.trim() === "")) return next(new ErrorHandler("All fields are required", 400))
     if (password.length < 8) return next(new ErrorHandler("Password must be at least 8 characters long", 400));
 
     const existingUser = await User.findOne({
-        $or: Object.entries(checkFields).map(([key, value]) => ({ [key]: value }))
+        $or: [{email}, {phone}]
     })
 
     if (existingUser) {
@@ -130,15 +134,30 @@ const registerUser = asyncHandler(async (req, res, next) => {
 
     try {
         const user = await User.create({
-            fullName, email, phone, password
+            username, 
+            email, 
+            phone, 
+            password,
+            gender: gender || 'not specified'
         })
         await cookieToken(user, res)
+        await logActivity(
+            user._id,
+            "register",
+            `${user.username} registered`,
+            req,
+            'user',
+            user._id
+        );
     } catch (error) {
+        console.error("User creation error:", error);
         if (error instanceof mongoose.Error.ValidationError) {
-            Object.values(error.errors).forEach(err => {
-                return next(new ErrorHandler(`Field: ${err.path} → ${err.message}`));
-            });
-        } else return false;
+            for (const err of Object.values(error.errors)) {
+                next(new ErrorHandler(`Field: ${err.path} -> ${err.message}`));
+            }
+        } else {
+            return next(new ErrorHandler(`Database error: ${error.message}`, 500));
+        }
     }
 })
 
@@ -158,6 +177,14 @@ const loginUser = asyncHandler(async (req, res, next) => {
         if (!isPasswordValid) return next(new ErrorHandler("Invalid credentials", 400))
 
         cookieToken(user, res)
+        await logActivity(
+            user._id,
+            "login",
+            `${user.username} logged in`,
+            req,
+            'user',
+            user._id
+        );
     } catch (error) {
         return next(new ErrorHandler(`Something went wrong..details - ${error.message}`, 500))
     }
@@ -181,8 +208,16 @@ const logoutUser = asyncHandler(async (req, res, next) => {
                 {
                     new: true
                 }
-            )
+            ).select("username");
      
+            await logActivity(
+                req.user._id,
+                "logout",
+                `${user.username} logged out`,
+                req,
+                'user',
+                req.user._id
+            );
         } catch (error) {
         }
 
@@ -276,6 +311,15 @@ const verifyOtpForUser = asyncHandler(async (req, res, next) => {
 
     await user.save({ validateBeforeSave: false });
 
+    await logActivity(
+        user._id,
+        "verify-otp",
+        `${user.username} verified OTP`,
+        req,
+        'user',
+        user._id
+    );
+
     const options = {
         httpOnly: true,
         secure: true,
@@ -284,11 +328,10 @@ const verifyOtpForUser = asyncHandler(async (req, res, next) => {
     }
 
     const resUser = await User.findById(user._id).select("-password -refreshToken");
-    return res.status(200).
-        cookie("accessToken", accessToken, options)
-        .
-        cookie("refreshToken", refreshToken, options).
-        json({
+    return res.status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json({
             success: true,
             message: `${email} verified successfully\nUser Created`,
             user: resUser, accessToken, refreshToken
@@ -381,11 +424,19 @@ const resetPassword = asyncHandler(async (req, res, next) => {
 
     await user.save({ validateBeforeSave: true });
 
+    await logActivity(
+        user._id,
+        "reset-password",
+        `${user.username} reset password`,
+        req,
+        'user',
+        user._id
+    );
 
     return res.status(200).
         json({
             success: true,
-            message: `Password for ${user.fullName} changed!`,
+            message: `Password for ${user.username} changed!`,
         })
 })
 
@@ -420,6 +471,14 @@ const changeCurrentPassword = asyncHandler(async (req, res, next) => {
     user.password = newPassword;
     await user.save({ validateBeforeSave: false });
 
+    await logActivity(
+        req.user._id,
+        "change-password",
+        `${user.username} changed password`,
+        req,
+        'user',
+        req.user._id
+    );
 
     return res.status(200).json({
         success: true,
@@ -432,14 +491,17 @@ const changeCurrentPassword = asyncHandler(async (req, res, next) => {
 // *Update Profile User
 const updateUserProfile = asyncHandler(async (req, res, next) => {
     const userId = req.user?._id
-    const { fullName, email, phone, gender, social_links = {} } = req.body
+    const { username, email, phone, gender, bio, social_links = {} } = req.body
+
+    console.log('Backend: Updating user profile for ID:', userId);
+    console.log('Backend: Update data received:', { username, email, phone, gender, bio, social_links });
 
     const requiredFields = [email, phone]
 
     const checkFields = { email, phone }
 
     // *Required Fields_____________________________________________
-    if (!fullName || !email || !phone) {
+    if (!username || !email || !phone) {
         return next(new ErrorHandler("All Fields are required", 400))
     }
 
@@ -494,7 +556,7 @@ const updateUserProfile = asyncHandler(async (req, res, next) => {
 
     const updatedUser = await User.findByIdAndUpdate(
         userId,
-        { fullName, email, phone, gender, social_links },
+        { username, email, phone, gender, bio, social_links },
         { new: true, runValidators: true }
     ).select("-password -refreshToken");
 
@@ -502,6 +564,7 @@ const updateUserProfile = asyncHandler(async (req, res, next) => {
         return next(new ErrorHandler("User not found", 404));
     }
 
+    console.log('Backend: User updated successfully:', updatedUser);
 
     return res.status(200).json({
         success: true,
@@ -556,6 +619,15 @@ const updateUserAvatar = asyncHandler(async (req, res, next) => {
             { new: true }
         ).select("-password")
 
+        await logActivity(
+            req.user._id,
+            "avatar",
+            `${updatedUser.username} updated avatar`,
+            req,
+            'user',
+            req.user._id
+        );
+
         return res
             .status(200)
             .json({
@@ -571,13 +643,71 @@ const updateUserAvatar = asyncHandler(async (req, res, next) => {
 
 // *User Info Route
 const getLoggedInUserInfo = asyncHandler(async (req, res, next) => {
-    const user = await User.findById(req.user._id).select("-password -refreshToken")
+    const userId = req.user._id;
+
+    // Get user basic info
+    const user = await User.findById(userId).select("-password -refreshToken").populate('savedPosts', '_id title');
+
+    // Calculate stats
+    const [postsCount, commentsCount, upvotesCount, downvotesCount, communitiesCount] = await Promise.all([
+        // Count posts by user
+        mongoose.model('Post').countDocuments({ author_id: userId }),
+        // Count comments by user
+        mongoose.model('Comment').countDocuments({ author_id: userId }),
+        // Count upvotes received on user's posts and comments
+        Promise.all([
+            mongoose.model('Post').aggregate([
+                { $match: { author_id: userId } },
+                { $project: { upvotesCount: { $size: "$upvotes" } } },
+                { $group: { _id: null, total: { $sum: "$upvotesCount" } } }
+            ]),
+            mongoose.model('Comment').aggregate([
+                { $match: { author_id: userId } },
+                { $project: { upvotesCount: { $size: "$upvotes" } } },
+                { $group: { _id: null, total: { $sum: "$upvotesCount" } } }
+            ])
+        ]).then(([postUpvotes, commentUpvotes]) => {
+            const postTotal = postUpvotes[0]?.total || 0;
+            const commentTotal = commentUpvotes[0]?.total || 0;
+            return postTotal + commentTotal;
+        }),
+        // Count downvotes received on user's posts and comments
+        Promise.all([
+            mongoose.model('Post').aggregate([
+                { $match: { author_id: userId } },
+                { $project: { downvotesCount: { $size: "$downvotes" } } },
+                { $group: { _id: null, total: { $sum: "$downvotesCount" } } }
+            ]),
+            mongoose.model('Comment').aggregate([
+                { $match: { author_id: userId } },
+                { $project: { downvotesCount: { $size: "$downvotes" } } },
+                { $group: { _id: null, total: { $sum: "$downvotesCount" } } }
+            ])
+        ]).then(([postDownvotes, commentDownvotes]) => {
+            const postTotal = postDownvotes[0]?.total || 0;
+            const commentTotal = commentDownvotes[0]?.total || 0;
+            return postTotal + commentTotal;
+        }),
+        // Count communities user is member of
+        mongoose.model('Community').countDocuments({ members: userId })
+    ]);
+
+    const userWithStats = {
+        ...user.toObject(),
+        stats: {
+            posts: postsCount,
+            comments: commentsCount,
+            upvotes: upvotesCount,
+            downvotes: downvotesCount,
+            communities: communitiesCount
+        }
+    };
 
     res.status(200).json({
         success: true,
-        user
-    })
-})
+        user: userWithStats
+    });
+});
 
 // *Delete User
 const deleteUser = asyncHandler(async (req, res, next) => {
@@ -591,6 +721,15 @@ const deleteUser = asyncHandler(async (req, res, next) => {
 
         }
 
+        await logActivity(
+            req.user._id,
+            "delete-user",
+            `${user.username} deleted account`,
+            req,
+            'user',
+            userId
+        );
+
         // Delete the user
         await User.findByIdAndDelete(userId);
 
@@ -599,6 +738,235 @@ const deleteUser = asyncHandler(async (req, res, next) => {
     } catch (error) {
         return next(new ErrorHandler("Internal Server Error", 500))
     }
+});
+
+// *Google OAuth Callback
+const googleAuthCallback = asyncHandler(async (req, res, next) => {
+    try {
+        // User is authenticated via passport, req.user contains the user
+        const user = req.user;
+
+        if (!user) {
+            return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=Google authentication failed`);
+        }
+
+        // Generate tokens
+        const accessToken = await user.generateAccessToken();
+        const refreshToken = await user.generateRefreshToken();
+
+        // Save refresh token
+        user.refreshToken = refreshToken;
+        await user.save({ validateBeforeSave: false });
+
+        // Set cookies
+        const options = {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'Strict'
+        };
+
+        res.cookie('accessToken', accessToken, options);
+        res.cookie('refreshToken', refreshToken, options);
+
+        // Redirect to frontend with success
+        res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/?auth=success`);
+    } catch (error) {
+        console.error('Google auth callback error:', error);
+        res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=Authentication failed`);
+    }
+});
+
+// *Follow User
+const followUser = asyncHandler(async (req, res, next) => {
+    const { userId } = req.params;
+    const currentUserId = req.user._id;
+
+    if (userId === currentUserId.toString()) {
+        return next(new ErrorHandler("You cannot follow yourself", 400));
+    }
+
+    const userToFollow = await User.findById(userId);
+    const currentUser = await User.findById(currentUserId);
+
+    if (!userToFollow) {
+        return next(new ErrorHandler("User not found", 404));
+    }
+
+    // Check if already following
+    if (currentUser.following.includes(userId)) {
+        return next(new ErrorHandler("You are already following this user", 400));
+    }
+
+    // Add to following and followers
+    await User.findByIdAndUpdate(currentUserId, {
+        $push: { following: userId },
+        $inc: { num_following: 1 }
+    });
+
+    await User.findByIdAndUpdate(userId, {
+        $push: { followers: currentUserId },
+        $inc: { num_followers: 1 }
+    });
+
+    await logActivity(
+        currentUserId,
+        "follow",
+        `${currentUser.username} followed ${userToFollow.username}`,
+        req,
+        'user',
+        userId
+    );
+
+    res.status(200).json({
+        success: true,
+        message: `You are now following ${userToFollow.username}`
+    });
+});
+
+// *Unfollow User
+const unfollowUser = asyncHandler(async (req, res, next) => {
+    const { userId } = req.params;
+    const currentUserId = req.user._id;
+
+    if (userId === currentUserId.toString()) {
+        return next(new ErrorHandler("You cannot unfollow yourself", 400));
+    }
+
+    const userToUnfollow = await User.findById(userId);
+    const currentUser = await User.findById(currentUserId);
+
+    if (!userToUnfollow) {
+        return next(new ErrorHandler("User not found", 404));
+    }
+
+    // Check if following
+    if (!currentUser.following.includes(userId)) {
+        return next(new ErrorHandler("You are not following this user", 400));
+    }
+
+    // Remove from following and followers
+    await User.findByIdAndUpdate(currentUserId, {
+        $pull: { following: userId },
+        $inc: { num_following: -1 }
+    });
+
+    await User.findByIdAndUpdate(userId, {
+        $pull: { followers: currentUserId },
+        $inc: { num_followers: -1 }
+    });
+
+    await logActivity(
+        currentUserId,
+        "unfollow",
+        `${currentUser.username} unfollowed ${userToUnfollow.username}`,
+        req,
+        'user',
+        userId
+    );
+
+    res.status(200).json({
+        success: true,
+        message: `You have unfollowed ${userToUnfollow.username}`
+    });
+});
+
+// *Get Followers
+const getUserFollowers = asyncHandler(async (req, res, next) => {
+    const { userId } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const user = await User.findById(userId).populate({
+        path: 'followers',
+        select: 'username avatar _id',
+        options: { skip, limit }
+    });
+
+    if (!user) {
+        return next(new ErrorHandler("User not found", 404));
+    }
+
+    res.status(200).json({
+        success: true,
+        followers: user.followers,
+        totalFollowers: user.num_followers,
+        currentPage: page,
+        totalPages: Math.ceil(user.num_followers / limit)
+    });
+});
+
+// *Get Following
+const getUserFollowing = asyncHandler(async (req, res, next) => {
+    const { userId } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const user = await User.findById(userId).populate({
+        path: 'following',
+        select: 'username avatar _id',
+        options: { skip, limit }
+    });
+
+    if (!user) {
+        return next(new ErrorHandler("User not found", 404));
+    }
+
+    res.status(200).json({
+        success: true,
+        following: user.following,
+        totalFollowing: user.num_following,
+        currentPage: page,
+        totalPages: Math.ceil(user.num_following / limit)
+    });
+});
+
+// *Check Follow Status
+const checkFollowStatus = asyncHandler(async (req, res, next) => {
+    const { userId } = req.params;
+    const currentUserId = req.user._id;
+
+    const currentUser = await User.findById(currentUserId);
+
+    const isFollowing = currentUser.following.includes(userId);
+
+    res.status(200).json({
+        success: true,
+        isFollowing
+    });
+});
+
+// *Get User by ID
+const getUserById = asyncHandler(async (req, res, next) => {
+    const { userId } = req.params;
+
+    const user = await User.findById(userId).select("-password -refreshToken -verificationCode -verificationCodeExpire -forgotPasswordToken -forgotPasswordTokenExpiry");
+
+    if (!user) {
+        return next(new ErrorHandler("User not found", 404));
+    }
+
+    // Get user stats
+    const [postsCount, commentsCount, communitiesCount] = await Promise.all([
+        mongoose.model('Post').countDocuments({ author_id: userId }),
+        mongoose.model('Comment').countDocuments({ author_id: userId }),
+        mongoose.model('Community').countDocuments({ members: userId })
+    ]);
+
+    const userWithStats = {
+        ...user.toObject(),
+        stats: {
+            posts: postsCount,
+            comments: commentsCount,
+            communities: communitiesCount
+        }
+    };
+
+    res.status(200).json({
+        success: true,
+        user: userWithStats
+    });
 });
 
 // *Exports
@@ -616,4 +984,11 @@ export {
     updateUserProfile,
     updateUserAvatar,
     deleteUser,
+    googleAuthCallback,
+    followUser,
+    unfollowUser,
+    getUserFollowers,
+    getUserFollowing,
+    checkFollowStatus,
+    getUserById
 }

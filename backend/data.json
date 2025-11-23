@@ -1,0 +1,107 @@
+[
+  {
+    "user_id": "507f1f77bcf86cd799439011",
+    "event_type": "user_login",
+    "description": "User logged in successfully",
+    "entity_type": "user",
+    "entity_id": "507f1f77bcf86cd799439011",
+    "session_id": "sess_123456789",
+    "props": {
+      "geo_location": "Mumbai, India",
+      "ip_address": "192.168.1.100",
+      "device": "Desktop",
+      "browser": "Chrome",
+      "platform": "Windows"
+    },
+    "request": {
+      "method": "POST",
+      "path": "/api/v1/users/login",
+      "ip_address": "192.168.1.100"
+    },
+    "occurred_at": "2025-11-23T10:00:00.000Z"
+  },
+  {
+    "user_id": "507f1f77bcf86cd799439012",
+    "event_type": "community_created",
+    "description": "User created a new community",
+    "entity_type": "community",
+    "entity_id": "60f1f77bcf86cd799439013",
+    "session_id": "sess_123456790",
+    "props": {
+      "geo_location": "Delhi, India",
+      "ip_address": "192.168.1.101",
+      "device": "Mobile",
+      "browser": "Safari",
+      "platform": "iOS"
+    },
+    "request": {
+      "method": "POST",
+      "path": "/api/v1/communities",
+      "ip_address": "192.168.1.101"
+    },
+    "occurred_at": "2025-11-23T10:15:00.000Z"
+  },
+  {
+    "user_id": "507f1f77bcf86cd799439013",
+    "event_type": "post_created",
+    "description": "User created a new post",
+    "entity_type": "post",
+    "entity_id": "60f1f77bcf86cd799439014",
+    "session_id": "sess_123456791",
+    "props": {
+      "geo_location": "Bangalore, India",
+      "ip_address": "192.168.1.102",
+      "device": "Desktop",
+      "browser": "Firefox",
+      "platform": "Linux"
+    },
+    "request": {
+      "method": "POST",
+      "path": "/api/v1/posts",
+      "ip_address": "192.168.1.102"
+    },
+    "occurred_at": "2025-11-23T10:30:00.000Z"
+  },
+  {
+    "user_id": "507f1f77bcf86cd799439014",
+    "event_type": "comment_created",
+    "description": "User commented on a post",
+    "entity_type": "comment",
+    "entity_id": "60f1f77bcf86cd799439015",
+    "session_id": "sess_123456792",
+    "props": {
+      "geo_location": "Chennai, India",
+      "ip_address": "192.168.1.103",
+      "device": "Mobile",
+      "browser": "Chrome",
+      "platform": "Android"
+    },
+    "request": {
+      "method": "POST",
+      "path": "/api/v1/comments",
+      "ip_address": "192.168.1.103"
+    },
+    "occurred_at": "2025-11-23T10:45:00.000Z"
+  },
+  {
+    "user_id": "507f1f77bcf86cd799439015",
+    "event_type": "vote_cast",
+    "description": "User upvoted a post",
+    "entity_type": "post",
+    "entity_id": "60f1f77bcf86cd799439016",
+    "session_id": "sess_123456793",
+    "props": {
+      "geo_location": "Pune, India",
+      "ip_address": "192.168.1.104",
+      "device": "Desktop",
+      "browser": "Edge",
+      "platform": "Windows"
+    },
+    "request": {
+      "method": "POST",
+      "path": "/api/v1/votes/upvote",
+      "ip_address": "192.168.1.104"
+    },
+    "occurred_at": "2025-11-23T11:00:00.000Z"
+  }
+]
