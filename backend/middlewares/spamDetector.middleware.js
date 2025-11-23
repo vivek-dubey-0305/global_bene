@@ -15,7 +15,7 @@ export const spamDetector = asyncHandler(async (req, res, next) => {
 
         console.log("\n-------------\nSPAM DETECTOR MIDDLEWARE")
         // Call the external spam detection API
-        const { data } = await axios.post(`${process.env.SPAM_SERVICE_API_KEY}/predict`, { text });
+        const { data } = await axios.post(`${process.env.SPAM_SERVICE_URL}/predict`, { text });
         console.log(data);
 
         const spamProbability = data.toxicity_detection.all_scores.spam
