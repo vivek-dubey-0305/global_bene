@@ -23,6 +23,8 @@ app.use(express.json({ limit: "256kb" }));
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser());
 
+const isProduction = process.env.NODE_ENV === "production";
+
 // Session middleware
 app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key',
@@ -30,7 +32,7 @@ app.use(session({
   saveUninitialized: false,
   cookie: { 
     secure: isProduction, // ✅ CRITICAL FIX: Set to true in production/HTTPS
-    sameSite: isProduction ? 'Lax' : 'Lax', // It's best practice to explicitly set SameSite
+    sameSite: isProduction ? 'lax' : 'lax', // It's best practice to explicitly set SameSite
   }
 }));
 
