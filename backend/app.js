@@ -17,6 +17,7 @@ import voteRouter from "./routes/vote.route.js"
 import searchRouter from "./routes/search.route.js"
 
 const app = express();
+const isProduction = process.env.NODE_ENV === 'production';
 config({ path: "./.env" })
 app.use(express.json({ limit: "256kb" }));
 app.use(express.urlencoded({ extended: true }))
@@ -27,7 +28,10 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key',
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false } // Set to true if using HTTPS
+  cookie: { 
+    secure: isProduction, // ✅ CRITICAL FIX: Set to true in production/HTTPS
+    sameSite: isProduction ? 'Lax' : 'Lax', // It's best practice to explicitly set SameSite
+  }
 }));
 
 // Initialize Passport
