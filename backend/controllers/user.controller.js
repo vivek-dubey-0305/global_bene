@@ -25,7 +25,7 @@ function generateEmailLinkTemplate(Token) {
                     <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f7f7f7;">
                         <div>
                             <h3>
-                                <a href="http://localhost:5173/password/reset/${Token}">Click here to reset password</a>
+                                <a href="https://global-bene.vercel.app/password/reset/${Token}">Click here to reset password</a>
                             </h3>
                         </div>
                     </body>
