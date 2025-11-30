@@ -44,10 +44,19 @@ const extractRequestContext = (req, fallbackSessionId) => {
         ? authHeader.split(" ")[1]
         : req.cookies?.accessToken || fallbackSessionId;
 
+    // Get real IP address, handling proxies
+    let ipAddress = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.connection?.remoteAddress || req.socket?.remoteAddress || req.ip || "";
+    if (ipAddress.includes(',')) {
+        ipAddress = ipAddress.split(',')[0].trim(); // Take first IP if multiple
+    }
+    if (ipAddress === '::1' || ipAddress === '127.0.0.1') {
+        ipAddress = 'localhost'; // For development
+    }
+
     return {
         token: token || null,
         userAgent: req.headers?.["user-agent"] || "",
-        ipAddress: req.ip || req.connection?.remoteAddress || "",
+        ipAddress,
         method: req.method || "",
         path: req.originalUrl || req.url || "",
     };
@@ -69,7 +78,10 @@ export const logActivity = async (
         const occurredAt = new Date();
 
         const props = {
-            geo_location: additionalProps.geo_location || "",
+            geo_location: additionalProps.geo_location || {
+                latitude: req.headers['x-user-latitude'] || null,
+                longitude: req.headers['x-user-longitude'] || null,
+            },
             ip_address: ipAddress,
             device,
             browser,
@@ -104,11 +116,6 @@ export const logActivity = async (
             entity_id: entity_id ? entity_id.toString?.() ?? String(entity_id) : null,
             session_id: token,
             props,
-            request: {
-                method,
-                path,
-                ip_address: ipAddress,
-            },
             occurred_at: occurredAt.toISOString(),
         };
 

@@ -79,11 +79,47 @@ const axiosInstance = axios.create({
   },
 });
 
-// 🔄 Auto attach token
+// Function to get geolocation
+const getGeolocation = () => {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) {
+      resolve({ latitude: null, longitude: null });
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        resolve({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+      },
+      (error) => {
+        console.warn('Geolocation error:', error.message);
+        resolve({ latitude: null, longitude: null });
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 300000, // 5 minutes
+      }
+    );
+  });
+};
+
+// 🔄 Auto attach token and geolocation
 axiosInstance.interceptors.request.use(
-  (config) => {
+  async (config) => {
     const token = localStorage.getItem("accessToken");
     if (token) config.headers.Authorization = `Bearer ${token}`;
+
+    // Add geolocation
+    const geo = await getGeolocation();
+    if (geo.latitude && geo.longitude) {
+      config.headers['X-User-Latitude'] = geo.latitude;
+      config.headers['X-User-Longitude'] = geo.longitude;
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
