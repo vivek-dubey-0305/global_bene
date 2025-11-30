@@ -1,9 +1,11 @@
+// -----------------------------------------------------------------------------------
 // import axios from "axios";
 
 // const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1";
 
 // const axiosInstance = axios.create({
 //   baseURL: API_BASE_URL,
+//   withCredentials: true, // allows sending cookies (refresh token)
 //   headers: {
 //     "Content-Type": "application/json",
 //   },
@@ -35,11 +37,8 @@
 
 //       try {
 //         // Try to refresh the token
-//         const refreshToken = localStorage.getItem('refreshToken');
-//         const refreshResponse = await axios.post(`${API_BASE_URL}/users/refresh-token`, { refreshToken }, {
-//           headers: {
-//             'Content-Type': 'application/json'
-//           }
+//         const refreshResponse = await axios.post(`${API_BASE_URL}/users/refresh-token`, {}, {
+//           withCredentials: true
 //         });
 
 //         if (refreshResponse.data.accessToken) {
@@ -65,6 +64,12 @@
 // );
 
 // export default axiosInstance;
+
+
+// -----------------------------------------------------------------------------------
+
+// *GEO LOCATON 
+
 
 
 import axios from "axios";
@@ -168,3 +173,4 @@ axiosInstance.interceptors.response.use(
 );
 
 export default axiosInstance;
+
