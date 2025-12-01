@@ -203,10 +203,7 @@ export const logActivity = async (
         const occurredAt = new Date();
 
         const props = {
-            geo_location: additionalProps.geo_location || {
-                latitude: req.headers['x-user-latitude'] || null,
-                longitude: req.headers['x-user-longitude'] || null,
-            },
+            geo_location: additionalProps.geo_location || `${req.headers['x-user-latitude'] || ''},${req.headers['x-user-longitude'] || ''}`,
             ip_address: ipAddress,
             device,
             browser,
