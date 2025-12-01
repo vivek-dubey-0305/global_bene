@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader } from '@/components/common/Loader';
-import { Users, FileText, MessageSquare, Building, TrendingUp, Activity, Shield, ArrowLeft } from 'lucide-react';
+import { Users, FileText, MessageSquare, Building, TrendingUp, Activity, Shield, ArrowLeft, BarChart3 } from 'lucide-react';
 import { getAdminStats, getAllActivityLogs } from '../../redux/slice/admin.slice';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -24,36 +24,36 @@ const AdminDashboard = () => {
       title: 'Total Users',
       value: stats?.totalUsers || 0,
       icon: Users,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50 dark:bg-blue-900/20',
+      color: 'text-primary',
+      bgColor: 'bg-primary/10',
     },
     {
       title: 'Total Posts',
       value: stats?.totalPosts || 0,
       icon: FileText,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50 dark:bg-green-900/20',
+      color: 'text-primary',
+      bgColor: 'bg-primary/10',
     },
     {
       title: 'Total Comments',
       value: stats?.totalComments || 0,
       icon: MessageSquare,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50 dark:bg-purple-900/20',
+      color: 'text-primary',
+      bgColor: 'bg-primary/10',
     },
     {
       title: 'Total Communities',
       value: stats?.totalCommunities || 0,
       icon: Building,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50 dark:bg-orange-900/20',
+      color: 'text-primary',
+      bgColor: 'bg-primary/10',
     },
     {
       title: 'Active Users Today',
       value: stats?.activeUsersToday || 0,
       icon: TrendingUp,
-      color: 'text-red-600',
-      bgColor: 'bg-red-50 dark:bg-red-900/20',
+      color: 'text-primary',
+      bgColor: 'bg-primary/10',
     },
   ];
 
@@ -93,10 +93,10 @@ const AdminDashboard = () => {
         >
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              <h1 className="text-3xl font-bold text-foreground">
                 Admin Dashboard
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-2">
+              <p className="text-muted-foreground mt-2">
                 Overview of your platform statistics
               </p>
             </div>
@@ -118,14 +118,14 @@ const AdminDashboard = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
-                <Card className="hover:shadow-lg transition-shadow">
+                <Card className="hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-border/50">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        <p className="text-sm font-medium text-muted-foreground">
                           {stat.title}
                         </p>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                        <p className="text-2xl font-bold text-foreground">
                           {stat.value.toLocaleString()}
                         </p>
                       </div>
@@ -140,10 +140,10 @@ const AdminDashboard = () => {
           </div>
 
           <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
+            <Card className="hover:shadow-lg transition-all duration-300 border-border/50">
               <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-foreground">Quick Actions</CardTitle>
+                <CardDescription className="text-muted-foreground">
                   Common administrative tasks
                 </CardDescription>
               </CardHeader>
@@ -164,13 +164,17 @@ const AdminDashboard = () => {
                   <Shield className="mr-2 h-4 w-4" />
                   Manage Spam
                 </Button>
+                <Button className="w-full justify-start" variant="outline" onClick={() => window.open('https://arced-bark.metabaseapp.com/public/dashboard/83a7cdbd-5fc4-4edf-9c2a-3ab6a9a23b55', '_blank')}>
+                  <BarChart3 className="mr-2 h-4 w-4" />
+                  Kafka Dashboard
+                </Button>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="hover:shadow-lg transition-all duration-300 border-border/50">
               <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-foreground">Recent Activity</CardTitle>
+                <CardDescription className="text-muted-foreground">
                   Latest platform activity
                 </CardDescription>
               </CardHeader>
@@ -184,13 +188,13 @@ const AdminDashboard = () => {
                         : null;
                       
                       return (
-                        <div key={index} className="flex items-start gap-3 p-2 rounded-lg bg-gray-50 dark:bg-gray-800">
-                          <Activity className="h-4 w-4 mt-0.5 text-blue-600" />
+                        <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors border border-border/50">
+                          <Activity className="h-4 w-4 mt-0.5 text-primary shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                            <p className="text-sm font-medium text-foreground">
                               {log.user?.username || 'Unknown User'}
                             </p>
-                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                            <p className="text-xs text-muted-foreground">
                               {latestActivity?.event_type || 'Activity'} • {latestActivity?.timestamp ? formatDistanceToNow(new Date(latestActivity.timestamp), { addSuffix: true }) : 'Unknown time'}
                             </p>
                           </div>
@@ -199,7 +203,7 @@ const AdminDashboard = () => {
                     })}
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-muted-foreground">
                     No recent activity found.
                   </p>
                 )}

@@ -450,6 +450,7 @@ const adminSlice = createSlice({
       })
       .addCase(adminDeleteCommunity.fulfilled, (state, action) => {
         state.loading = false;
+        state.error = null;
         // Remove community from communities list
         state.communities = state.communities.filter(community => community._id !== action.meta.arg);
       })

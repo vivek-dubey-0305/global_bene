@@ -107,8 +107,9 @@ const LeftSidebar = () => {
             return (
               <motion.div
                 key={item.path}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
               >
                 <Link to={item.path}>
                   <Button
@@ -118,7 +119,7 @@ const LeftSidebar = () => {
                     }`}
                     title={isCollapsed ? item.label : ''}
                   >
-                    <Icon className="h-5 w-5 flex-shrink-0" />
+                    <Icon className="h-5 w-5 shrink-0" />
                     {!isCollapsed && <span className="font-medium">{item.label}</span>}
                   </Button>
                 </Link>
@@ -132,12 +133,13 @@ const LeftSidebar = () => {
 
         {/* Create Post */}
         <motion.div
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
         >
           <Link to="/create-post">
             <Button className={`w-full justify-${isCollapsed ? 'center' : 'start'} gap-3 h-12 bg-primary hover:bg-primary/90`} title={isCollapsed ? 'Create Post' : ''}>
-              <Plus className="h-5 w-5 flex-shrink-0" />
+              <Plus className="h-5 w-5 shrink-0" />
               {!isCollapsed && <span className="font-medium">Create Post</span>}
             </Button>
           </Link>
@@ -145,12 +147,13 @@ const LeftSidebar = () => {
 
         {/* Create Community */}
         <motion.div
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
         >
           <Link to="/create-community">
             <Button variant="outline" className={`w-full justify-${isCollapsed ? 'center' : 'start'} gap-3 h-12`} title={isCollapsed ? 'Create Community' : ''}>
-              <Plus className="h-5 w-5 flex-shrink-0" />
+              <Plus className="h-5 w-5 shrink-0" />
               {!isCollapsed && <span className="font-medium">Create Community</span>}
             </Button>
           </Link>
@@ -168,8 +171,9 @@ const LeftSidebar = () => {
               return (
                 <motion.div
                   key={item.path}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
                 >
                   <Link to={item.path}>
                     <Button
@@ -179,7 +183,7 @@ const LeftSidebar = () => {
                       }`}
                       title={isCollapsed ? item.label : ''}
                     >
-                      <Icon className="h-4 w-4 flex-shrink-0" />
+                      <Icon className="h-4 w-4 shrink-0" />
                       {!isCollapsed && <span>{item.label}</span>}
                     </Button>
                   </Link>
@@ -208,7 +212,7 @@ const LeftSidebar = () => {
                           }`}
                           title={isCollapsed ? item.label : ''}
                         >
-                          <Icon className="h-4 w-4 flex-shrink-0" />
+                          <Icon className="h-4 w-4 shrink-0" />
                           {!isCollapsed && <span>{item.label}</span>}
                         </Button>
                       </Link>

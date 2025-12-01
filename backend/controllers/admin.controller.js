@@ -310,7 +310,7 @@ const adminChangeUserRole = asyncHandler(async (req, res, next) => {
         const userId = req.params?.id;
         const { role } = req.body;
 
-        if (!role || !["user", "admin"].includes(role)) {
+        if (!role || !["user", "admin", "moderator"].includes(role)) {
             return next(new ErrorHandler("Invalid role provided", 400));
         }
 
@@ -708,6 +708,37 @@ const removeFlaggedPost = asyncHandler(async (req, res, next) => {
     }
 });
 
+// Admin delete community
+const adminDeleteCommunity = asyncHandler(async (req, res, next) => {
+    const { id } = req.params;
+    const adminId = req.user._id;
+
+    const community = await Community.findById(id);
+    if (!community) {
+        return next(new ErrorHandler("Community not found", 404));
+    }
+
+    // Log the admin activity
+    await logActivity(
+        adminId,
+        "admin-delete-community",
+        `Admin ${req.user.username} deleted community: ${community.title}`,
+        req,
+        'community',
+        id
+    );
+
+    // Delete the community
+    await Community.findByIdAndDelete(id);
+
+    // Decrement num_communities for the creator
+    await User.findByIdAndUpdate(community.creator_id, { $inc: { num_communities: -1 } });
+
+    res.status(200).json({
+        success: true,
+        message: "Community deleted successfully by admin"
+    });
+});
 
 export {
     getAllUsers,
@@ -720,6 +751,7 @@ export {
     getAllPostsForAdmin,
     getAllCommunitiesForAdmin,
     adminDeletePost,
+    adminDeleteCommunity,
     adminAddMemberToCommunity,
     adminRemoveMemberFromCommunity,
     getSpamReports,

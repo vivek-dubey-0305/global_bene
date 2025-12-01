@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import LeftSidebar from '@/components/layout/LeftSidebar';
 import Sidebar from '@/components/layout/Sidebar';
@@ -12,6 +13,9 @@ const MainLayout = ({ children, communities = [], userCommunities = [] }) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { user } = useSelector((state) => state.auth);
   const { unreadCount } = useSelector((state) => state.notification);
+  const location = useLocation();
+
+  const hideRightSidebar = ['/about', '/help', '/privacy', '/terms'].includes(location.pathname);
 
   const handleCreateCommunity = (newCommunity) => {
     // Handle community creation
@@ -40,13 +44,15 @@ const MainLayout = ({ children, communities = [], userCommunities = [] }) => {
         </div>
 
         {/* Right Sidebar - no padding, sticks to right edge */}
-        <aside className="hidden lg:block w-80 xl:w-96 pr-4 sm:pr-6 lg:pr-8 py-4 sm:py-6 shrink-0">
-          <Sidebar
-            communities={communities}
-            userCommunities={userCommunities}
-            onCreateCommunity={() => setShowCreateModal(true)}
-          />
-        </aside>
+        {!hideRightSidebar && (
+          <aside className="hidden lg:block w-80 xl:w-96 pr-4 sm:pr-6 lg:pr-8 py-4 sm:py-6 shrink-0">
+            <Sidebar
+              communities={communities}
+              userCommunities={userCommunities}
+              onCreateCommunity={() => setShowCreateModal(true)}
+            />
+          </aside>
+        )}
       </div>
 
       {/* Create Community Modal */}

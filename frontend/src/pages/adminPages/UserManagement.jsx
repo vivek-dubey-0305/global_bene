@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Loader } from '@/components/common/Loader';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Search, Edit, Trash2, UserCheck, UserX, MoreHorizontal, ArrowLeft } from 'lucide-react';
+import { Search, Edit, Trash2, UserCheck, UserX, MoreHorizontal, ArrowLeft, Shield } from 'lucide-react';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -58,6 +58,8 @@ const UserManagement = () => {
     switch (role) {
       case 'admin':
         return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
+      case 'moderator':
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300';
       case 'user':
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
       default:
@@ -83,10 +85,10 @@ const UserManagement = () => {
         >
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              <h1 className="text-3xl font-bold text-foreground">
                 User Management
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-2">
+              <p className="text-muted-foreground mt-2">
                 Manage users, roles, and permissions
               </p>
             </div>
@@ -104,7 +106,7 @@ const UserManagement = () => {
           <Card className="mb-6">
             <CardContent className="pt-6">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
                   placeholder="Search users by username or email..."
                   value={searchTerm}
@@ -146,14 +148,14 @@ const UserManagement = () => {
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <h3 className="font-medium text-gray-900 dark:text-gray-100">
+                        <h3 className="font-medium text-foreground">
                           {user.username}
                         </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-muted-foreground">
                           {user.email}
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-500">
-                          Joined {new Date(user.joined_at).toLocaleDateString()}
+                        <p className="text-xs text-muted-foreground">
+                          Joined {new Date(user.createdAt).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
@@ -173,21 +175,30 @@ const UserManagement = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" side="bottom">
-                          <DropdownMenuItem
-                            onClick={() => handleRoleChange(user._id, user.role === 'admin' ? 'user' : 'admin')}
-                          >
-                            {user.role === 'admin' ? (
-                              <>
-                                <UserX className="mr-2 h-4 w-4" />
-                                Demote to User
-                              </>
-                            ) : (
-                              <>
-                                <UserCheck className="mr-2 h-4 w-4" />
-                                Promote to Admin
-                              </>
-                            )}
-                          </DropdownMenuItem>
+                          {user.role !== 'admin' && (
+                            <DropdownMenuItem
+                              onClick={() => handleRoleChange(user._id, 'admin')}
+                            >
+                              <UserCheck className="mr-2 h-4 w-4" />
+                              Promote to Admin
+                            </DropdownMenuItem>
+                          )}
+                          {user.role !== 'moderator' && (
+                            <DropdownMenuItem
+                              onClick={() => handleRoleChange(user._id, 'moderator')}
+                            >
+                              <Shield className="mr-2 h-4 w-4" />
+                              Promote to Moderator
+                            </DropdownMenuItem>
+                          )}
+                          {user.role !== 'user' && (
+                            <DropdownMenuItem
+                              onClick={() => handleRoleChange(user._id, 'user')}
+                            >
+                              <UserX className="mr-2 h-4 w-4" />
+                              Demote to User
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
                             onClick={() => handleDeleteUser(user)}
@@ -205,7 +216,7 @@ const UserManagement = () => {
 
               {filteredUsers.length === 0 && !loading && (
                 <div className="text-center py-8">
-                  <p className="text-gray-600 dark:text-gray-400">
+                  <p className="text-muted-foreground">
                     {searchTerm ? 'No users found matching your search.' : 'No users found.'}
                   </p>
                 </div>

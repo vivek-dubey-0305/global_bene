@@ -83,10 +83,10 @@ const PostManagement = () => {
         >
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              <h1 className="text-3xl font-bold text-foreground">
                 Post Management
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-2">
+              <p className="text-muted-foreground mt-2">
                 Manage all posts on the platform
               </p>
             </div>

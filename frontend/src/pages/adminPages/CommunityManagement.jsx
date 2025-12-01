@@ -46,6 +46,26 @@ const CommunityManagement = () => {
     }
   };
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background p-6">
+        <div className="max-w-7xl mx-auto">
+          <Card className="w-full max-w-md mx-auto">
+            <CardContent className="pt-6">
+              <p className="text-center text-destructive">{error}</p>
+              <Button
+                onClick={() => dispatch(getAllCommunitiesForAdmin({ page: currentPage, limit: 20 }))}
+                className="w-full mt-4"
+              >
+                Retry
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   const handleViewCommunity = (communityName) => {
     navigate(`/g/${communityName}`);
   };
@@ -68,10 +88,10 @@ const CommunityManagement = () => {
         >
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              <h1 className="text-3xl font-bold text-foreground">
                 Community Management
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-2">
+              <p className="text-muted-foreground mt-2">
                 Manage all communities on the platform
               </p>
             </div>
@@ -89,7 +109,7 @@ const CommunityManagement = () => {
           <Card className="mb-6">
             <CardContent className="pt-6">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
                   placeholder="Search communities by name, title, or creator..."
                   value={searchTerm}
@@ -110,8 +130,8 @@ const CommunityManagement = () => {
             </CardHeader>
             <CardContent>
               {error && (
-                <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-                  <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+                <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+                  <p className="text-sm text-destructive">{error}</p>
                 </div>
               )}
 
@@ -121,7 +141,7 @@ const CommunityManagement = () => {
                     key={community._id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                    className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-secondary/50 transition-colors"
                   >
                     <div className="flex items-center space-x-4">
                       <Avatar>
