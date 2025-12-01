@@ -456,7 +456,7 @@ export const savePost = asyncHandler(async (req, res) => {
     await logActivity(
         userId,
         "save-post",
-        `${req.user.username} saved post`,
+        `${req.user.username || req.user.email || 'User'} saved post`,
         req,
         'post',
         id
@@ -495,7 +495,7 @@ export const unsavePost = asyncHandler(async (req, res) => {
     await logActivity(
         userId,
         "unsave-post",
-        `${req.user.username} unsaved post`,
+        `${req.user.username || req.user.email || 'User'} unsaved post`,
         req,
         'post',
         id

@@ -52,7 +52,10 @@ const activitySchema = new Schema(
     entity_id: { type: Schema.Types.ObjectId }, // id of the entity
     session_id: { type: String }, // access token
     props: {
-      geo_location: { type: String },
+      geo_location: {
+        latitude: { type: String },
+        longitude: { type: String }
+      },
       ip_address: { type: String },
       device: { type: String },
       browser: { type: String },

@@ -44,7 +44,9 @@ const Navbar = ({ user, notificationsCount = 0 }) => {
   const [isSearchLoading, setIsSearchLoading] = useState(false);
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [logoZoom, setLogoZoom] = useState({ show: false, x: 0, y: 0, cursorX: 0, cursorY: 0 });
   const searchRef = useRef(null);
+  const logoRef = useRef(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { theme, toggleTheme } = useTheme();
@@ -122,6 +124,35 @@ const Navbar = ({ user, notificationsCount = 0 }) => {
     navigate('/');
   };
 
+  // Logo zoom effect handlers
+  const handleLogoMouseMove = (e) => {
+    if (!logoRef.current) return;
+    
+    const rect = logoRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    
+    // Calculate cursor position relative to the logo for positioning the magnifier
+    const cursorX = e.clientX - rect.left;
+    const cursorY = e.clientY - rect.top;
+    
+    setLogoZoom({
+      show: true,
+      x: Math.max(0, Math.min(100, x)),
+      y: Math.max(0, Math.min(100, y)),
+      cursorX,
+      cursorY
+    });
+  };
+
+  const handleLogoMouseEnter = () => {
+    setLogoZoom(prev => ({ ...prev, show: true }));
+  };
+
+  const handleLogoMouseLeave = () => {
+    setLogoZoom({ show: false, x: 0, y: 0, cursorX: 0, cursorY: 0 });
+  };
+
   return (
     <motion.nav
       initial={{ y: -100 }}
@@ -132,33 +163,87 @@ const Navbar = ({ user, notificationsCount = 0 }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            className="flex items-center"
-          >
-              <Link to="/" className="flex items-center gap-2">
-                {/* Primary logo image (placed in `public/global_bene.png`). If image missing, fallback to initial circular G */}
-                <img
-                  src="/global_bane2-bg.png"
-                  alt="Global Bene"
-                  className="w-10 h-10 object-contain"
-                  onError={(e) => {
-                    // Show fallback circle-G when image fails to load
-                    e.target.onerror = null;
-                    e.target.style.display = 'none';
-                    document.getElementById('logo-fallback')?.style.removeProperty('display');
-                  }}
-                  onLoad={(e) => {
-                    // Hide fallback circle-G when image loads successfully
-                    document.getElementById('logo-fallback')?.style.setProperty('display', 'none', 'important');
-                  }}
-                />
-                <div id="logo-fallback" style={{ display: 'none' }} className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold text-lg">G</span>
+          <div className="flex items-center">
+            <Link to="/" className="flex items-center gap-2">
+              {/* Logo with zoom effect container */}
+              <div 
+                ref={logoRef}
+                className="relative w-10 h-10 rounded-lg cursor-pointer group"
+                onMouseMove={handleLogoMouseMove}
+                onMouseEnter={handleLogoMouseEnter}
+                onMouseLeave={handleLogoMouseLeave}
+              >
+                {/* Main logo image with subtle hover effect */}
+                <div className="relative w-full h-full">
+                  <img
+                    src="/global_bane2-bg.png"
+                    alt="Global Bene"
+                    className="w-full h-full object-contain transition-all duration-300 ease-in-out group-hover:brightness-110 hover:scale-150"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.style.display = 'none';
+                      document.getElementById('logo-fallback')?.style.removeProperty('display');
+                    }}
+                    onLoad={(e) => {
+                      document.getElementById('logo-fallback')?.style.setProperty('display', 'none', 'important');
+                    }}
+                  />
+                  
+                  {/* Fallback */}
+                  <div 
+                    id="logo-fallback" 
+                    style={{ display: 'none' }} 
+                    className="absolute inset-0 bg-primary rounded-full flex items-center justify-center"
+                  >
+                    <span className="text-primary-foreground font-bold text-lg">G</span>
+                  </div>
                 </div>
-                <span className="text-xl font-bold text-foreground hidden sm:block">Global Bene</span>
-              </Link>
-          </motion.div>
+                
+                {/* Zoomed magnifier - appears on hover following cursor */}
+                {logoZoom.show && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.5 }}
+                    transition={{ 
+                      duration: 0.3,
+                      ease: [0.25, 0.1, 0.25, 1]
+                    }}
+                    className="absolute pointer-events-none z-100"
+                    style={{
+                      width: '120px',
+                      height: '120px',
+                      left: `${logoZoom.cursorX}px`,
+                      top: `${logoZoom.cursorY}px`,
+                      transform: 'translate(-50%, -50%)',
+                      background: `url('/global_bane2-bg.png')`,
+                      backgroundSize: '300%',
+                      backgroundPosition: `${logoZoom.x}% ${logoZoom.y}%`,
+                      backgroundRepeat: 'no-repeat',
+                      borderRadius: '12px',
+                      boxShadow: '0 10px 40px rgba(0,0,0,0.3), 0 0 0 2px rgba(255,255,255,0.1), inset 0 0 20px rgba(255,255,255,0.1)',
+                      border: '3px solid rgba(255,255,255,0.3)',
+                      backdropFilter: 'blur(2px)',
+                    }}
+                  >
+                    {/* Glass effect overlay */}
+                    <div 
+                      className="absolute inset-0 rounded-[10px]" 
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 100%)',
+                        pointerEvents: 'none'
+                      }}
+                    />
+                  </motion.div>
+                )}
+              </div>
+              
+              {/* Text - no zoom effect */}
+              <span className="text-xl font-bold text-foreground hidden sm:block transition-colors duration-200">
+                Global Bene
+              </span>
+            </Link>
+          </div>
 
           {/* Desktop Search Bar */}
           <div className="hidden md:flex flex-1 max-w-2xl mx-8 relative" ref={searchRef}>
