@@ -81,7 +81,7 @@ export const createComment = asyncHandler(async (req, res) => {
     await logActivity(
         author,
         "reply",
-        `${req.user.username} created a comment`,
+        `${req.user.username || req.user.email || 'User'} created a comment`,
         req,
         'comment',
         comment._id
@@ -95,7 +95,7 @@ export const createComment = asyncHandler(async (req, res) => {
         const notification = await Notification.create({
             user: post.author_id,
             type: "comment",
-            message: `${req.user.username} commented on your post`,
+            message: `${req.user.username || req.user.email || 'User'} commented on your post`,
             relatedPost: postId,
             relatedComment: comment._id
         });
@@ -111,7 +111,7 @@ export const createComment = asyncHandler(async (req, res) => {
             const replyNotification = await Notification.create({
                 user: parentComment.author_id._id,
                 type: "reply",
-                message: `${req.user.username} replied to your comment`,
+                message: `${req.user.username || req.user.email || 'User'} replied to your comment`,
                 relatedPost: postId,
                 relatedComment: comment._id
             });

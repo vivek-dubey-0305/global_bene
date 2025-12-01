@@ -235,7 +235,7 @@ export const updatePost = asyncHandler(async (req, res) => {
     await logActivity(
         userId,
         "update-post",
-        `${req.user.username} updated post: ${post.title}`,
+        `${req.user.username || req.user.email || 'User'} updated post: ${post.title}`,
         req,
         'post',
         id
@@ -274,7 +274,7 @@ export const deletePost = asyncHandler(async (req, res) => {
     await logActivity(
         userId,
         "delete-post",
-        `${req.user.username} deleted post: ${post.title}`,
+        `${req.user.username || req.user.email || 'User'} deleted post: ${post.title}`,
         req,
         'post',
         id
@@ -315,7 +315,7 @@ export const upvotePost = asyncHandler(async (req, res) => {
         await logActivity(
             userId,
             "upvote",
-            `${req.user.username} upvoted post`,
+            `${req.user.username || req.user.email || 'User'} upvoted post`,
             req,
             'post',
             id
@@ -326,7 +326,7 @@ export const upvotePost = asyncHandler(async (req, res) => {
             notification = await Notification.create({
                 user: post.author_id,
                 type: "upvote",
-                message: `${req.user.username} upvoted your post`,
+                message: `${req.user.username || req.user.email || 'User'} upvoted your post`,
                 relatedPost: id
             });
         }
@@ -384,7 +384,7 @@ export const downvotePost = asyncHandler(async (req, res) => {
         await logActivity(
             userId,
             "downvote",
-            `${req.user.username} downvoted post`,
+            `${req.user.username || req.user.email || 'User'} downvoted post`,
             req,
             'post',
             id
@@ -395,7 +395,7 @@ export const downvotePost = asyncHandler(async (req, res) => {
             notification = await Notification.create({
                 user: post.author_id,
                 type: "downvote",
-                message: `${req.user.username} downvoted your post`,
+                message: `${req.user.username || req.user.email || 'User'} downvoted your post`,
                 relatedPost: id
             });
         }

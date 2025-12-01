@@ -92,7 +92,7 @@ const community = await Community.create({
     await logActivity(
         creator,
         "community",
-        `${req.user.username} created community: ${title}`,
+        `${req.user.username || req.user.email || 'User'} created community: ${title}`,
         req,
         'community',
         community._id
@@ -168,7 +168,7 @@ export const joinCommunity = asyncHandler(async (req, res) => {
     await logActivity(
         userId,
         "join-community",
-        `${req.user.username} joined community: ${community.title}`,
+        `${req.user.username || req.user.email || 'User'} joined community: ${community.title}`,
         req,
         'community',
         id
@@ -204,7 +204,7 @@ export const leaveCommunity = asyncHandler(async (req, res) => {
     await logActivity(
         userId,
         "leave-community",
-        `${req.user.username} left community: ${community.title}`,
+        `${req.user.username || req.user.email || 'User'} left community: ${community.title}`,
         req,
         'community',
         id
@@ -271,7 +271,7 @@ export const updateCommunity = asyncHandler(async (req, res) => {
     await logActivity(
         userId,
         "update-community",
-        `${req.user.username} updated community: ${community.title}`,
+        `${req.user.username || req.user.email || 'User'} updated community: ${community.title}`,
         req,
         'community',
         id
@@ -297,7 +297,7 @@ export const deleteCommunity = asyncHandler(async (req, res) => {
     await logActivity(
         userId,
         "delete-community",
-        `${req.user.username} deleted community: ${community.title}`,
+        `${req.user.username || req.user.email || 'User'} deleted community: ${community.title}`,
         req,
         'community',
         id
@@ -356,7 +356,7 @@ export const removeMemberFromCommunity = asyncHandler(async (req, res) => {
     await logActivity(
         userId,
         "remove-member",
-        `${req.user.username} removed a member from community: ${community.title}`,
+        `${req.user.username || req.user.email || 'User'} removed a member from community: ${community.title}`,
         req,
         'community',
         id
@@ -405,7 +405,7 @@ export const promoteToModerator = asyncHandler(async (req, res) => {
     await logActivity(
         userId,
         "promote-moderator",
-        `${req.user.username} promoted a member to moderator in community: ${community.title}`,
+        `${req.user.username || req.user.email || 'User'} promoted a member to moderator in community: ${community.title}`,
         req,
         'community',
         id
@@ -454,7 +454,7 @@ export const demoteFromModerator = asyncHandler(async (req, res) => {
     await logActivity(
         userId,
         "demote-moderator",
-        `${req.user.username} demoted a moderator in community: ${community.title}`,
+        `${req.user.username || req.user.email || 'User'} demoted a moderator in community: ${community.title}`,
         req,
         'community',
         id

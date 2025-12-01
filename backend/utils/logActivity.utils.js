@@ -221,8 +221,6 @@ export const logActivity = async (
             entity_id,
             session_id: token,
             props,
-            createdAt: occurredAt,
-            updatedAt: occurredAt,
         };
 
         await ActivityLog.findOneAndUpdate(

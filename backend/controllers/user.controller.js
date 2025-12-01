@@ -214,7 +214,7 @@ const logoutUser = asyncHandler(async (req, res, next) => {
             await logActivity(
                 req.user._id,
                 "logout",
-                `${user.username} logged out`,
+                `${user.username || req.user.email || 'User'} logged out`,
                 req,
                 'user',
                 req.user._id
