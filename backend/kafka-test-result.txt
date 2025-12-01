@@ -1,0 +1,6 @@
+🧪 Testing Kafka connection to Confluent Cloud...
+Environment variables loaded successfully
+Sending test event...
+✅ Kafka connection test successful!
+Event sent to topic: event
+SUCCESS

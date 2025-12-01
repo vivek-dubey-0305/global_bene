@@ -3,7 +3,7 @@ import { writeFileSync } from 'fs';
 import { sendActivityEvent } from './kafka.utils.js';
 
 // Load environment variables
-config({ path: "c:/Users/DELL/Desktop/Internship/Globle_Bane/global_bene/backend/.env" });
+config();
 
 // Test function to verify Kafka connection
 export const testKafkaConnection = async () => {
@@ -55,12 +55,11 @@ export const testKafkaConnection = async () => {
 };
 
 // Test the connection when this file is run directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  testKafkaConnection().then(() => {
-    console.log('Test completed.');
-    process.exit(0);
-  }).catch((error) => {
-    console.error('Test failed:', error);
-    process.exit(1);
-  });
-}
+console.log('Running test-kafka.js');
+testKafkaConnection().then(() => {
+  console.log('Test completed.');
+  process.exit(0);
+}).catch((error) => {
+  console.error('Test failed:', error);
+  process.exit(1);
+});

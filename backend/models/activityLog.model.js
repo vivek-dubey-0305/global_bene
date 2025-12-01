@@ -61,8 +61,9 @@ const activitySchema = new Schema(
       browser: { type: String },
       platform: { type: String }
     },
-  },
-  { timestamps: true }
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
+  }
 );
 
 const activityLogSchema = new Schema(
