@@ -125,6 +125,7 @@
 
 // utils/logActivity.utils.js
 
+import mongoose from "mongoose";
 import { ActivityLog } from "../models/activityLog.model.js";
 import { sendActivityEvent } from "./kafka.utils.js";
 
@@ -202,20 +203,28 @@ export const logActivity = async (
         const { device, browser, platform } = parseUserAgent(userAgent);
         const occurredAt = new Date();
 
-        const props = {
-            geo_location: additionalProps.geo_location || `${req.headers['x-user-latitude'] || ''},${req.headers['x-user-longitude'] || ''}`,
+        const baseProps = {
+            geo_location: `${req.headers['x-user-latitude'] || ''},${req.headers['x-user-longitude'] || ''}`,
             ip_address: ipAddress,
             device,
             browser,
             platform,
-            ...additionalProps,
         };
+
+        const props = { ...baseProps, ...additionalProps };
+
+        // Ensure geo_location is always a string
+        if (typeof props.geo_location === 'object' && props.geo_location.latitude && props.geo_location.longitude) {
+            props.geo_location = `${props.geo_location.latitude},${props.geo_location.longitude}`;
+        } else if (typeof props.geo_location !== 'string') {
+            props.geo_location = '';
+        }
 
         const activity = {
             event_type,
             description,
             entity_type,
-            entity_id,
+            entity_id: entity_id ? (mongoose.Types.ObjectId.isValid(entity_id) ? new mongoose.Types.ObjectId(entity_id) : null) : null,
             session_id: token,
             props,
             createdAt: occurredAt,
