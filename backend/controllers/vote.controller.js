@@ -72,23 +72,38 @@ export const vote = asyncHandler(async (req, res) => {
     // Update Vote model
     let userVote = await Vote.findOne({ user_id });
     if (!userVote) {
-        userVote = new Vote({ user_id, votes: { post: { target_ids: [], value: 0 }, comment: { target_ids: [], value: 0 } } });
+        userVote = new Vote({
+            user_id,
+            post_upvotes: { target_ids: [], value: 0 },
+            post_downvotes: { target_ids: [], value: 0 },
+            comment_upvotes: { target_ids: [], value: 0 },
+            comment_downvotes: { target_ids: [], value: 0 }
+        });
     }
 
-    const voteData = userVote.votes[target_type];
+    const voteKey = `${target_type}_${vote_type}s`;
+    const voteData = userVote[voteKey];
+    const oppositeVoteType = vote_type === 'up' ? 'down' : 'up';
+    const oppositeVoteKey = `${target_type}_${oppositeVoteType}s`;
+    const oppositeVoteData = userVote[oppositeVoteKey];
     const targetIdStr = target_id.toString();
     const hasVoted = voteData.target_ids.some(id => id.toString() === targetIdStr);
+    const hasOppositeVoted = oppositeVoteData.target_ids.some(id => id.toString() === targetIdStr);
 
     if (action === 'vote') {
+        if (hasOppositeVoted) {
+            oppositeVoteData.target_ids.pull(target_id);
+            oppositeVoteData.value = Math.max(0, oppositeVoteData.value - 1);
+        }
         if (!hasVoted) {
             voteData.target_ids.push(target_id);
+            voteData.value += 1;
         }
-        voteData.value += 1;
     } else if (action === 'unvote') {
         if (hasVoted) {
             voteData.target_ids.pull(target_id);
+            voteData.value = Math.max(0, voteData.value - 1);
         }
-        voteData.value = Math.max(0, voteData.value - 1);
     }
 
     await userVote.save();
@@ -104,14 +119,14 @@ export const vote = asyncHandler(async (req, res) => {
 export const getUserVotes = asyncHandler(async (req, res) => {
     const user_id = req.user._id;
 
-    const userVote = await Vote.findOne({ user_id }).populate('votes.post.target_ids').populate('votes.comment.target_ids');
+    const userVote = await Vote.findOne({ user_id }).populate('post_upvotes.target_ids post_downvotes.target_ids comment_upvotes.target_ids comment_downvotes.target_ids');
 
     if (!userVote) {
         return res.status(200).json(new ApiResponse(200, {
-            votes: {
-                post: { target_ids: [], value: 0 },
-                comment: { target_ids: [], value: 0 }
-            }
+            post_upvotes: { target_ids: [], value: 0 },
+            post_downvotes: { target_ids: [], value: 0 },
+            comment_upvotes: { target_ids: [], value: 0 },
+            comment_downvotes: { target_ids: [], value: 0 }
         }, "No votes found"));
     }
 
