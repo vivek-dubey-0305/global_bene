@@ -365,9 +365,9 @@ const PostCard = ({ post, onUpvote, onDownvote, onComment }) => {
                     <ArrowUp className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 group-hover:text-orange-500 transition-colors" />
                   </motion.button>
 
-                  <span className="px-2 py-1 text-xs sm:text-sm font-medium min-w-6 text-center text-foreground">
-                    {score}
-                  </span>
+                  <span className="px-1 py-1 text-xs font-semibold text-green-600 dark:text-green-500 min-w-[2rem] text-center">{upvotes.length}</span>
+                  <span className="px-1 text-xs text-muted-foreground">|</span>
+                  <span className="px-1 py-1 text-xs font-semibold text-red-600 dark:text-red-500 min-w-[2rem] text-center">{downvotes.length}</span>
 
                   <motion.button
                     whileHover={{ scale: 1.1 }}
