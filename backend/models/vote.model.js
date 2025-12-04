@@ -7,26 +7,44 @@ const voteSchema = new Schema({
         required: true,
         unique: true
     },
-    votes: {
-        post: {
-            target_ids: [{
-                type: Schema.Types.ObjectId,
-                ref: "Post"
-            }],
-            value: {
-                type: Number,
-                default: 0
-            }
-        },
-        comment: {
-            target_ids: [{
-                type: Schema.Types.ObjectId,
-                ref: "Comment"
-            }],
-            value: {
-                type: Number,
-                default: 0
-            }
+    post_upvotes: {
+        target_ids: [{
+            type: Schema.Types.ObjectId,
+            ref: "Post"
+        }],
+        value: {
+            type: Number,
+            default: 0
+        }
+    },
+    post_downvotes: {
+        target_ids: [{
+            type: Schema.Types.ObjectId,
+            ref: "Post"
+        }],
+        value: {
+            type: Number,
+            default: 0
+        }
+    },
+    comment_upvotes: {
+        target_ids: [{
+            type: Schema.Types.ObjectId,
+            ref: "Comment"
+        }],
+        value: {
+            type: Number,
+            default: 0
+        }
+    },
+    comment_downvotes: {
+        target_ids: [{
+            type: Schema.Types.ObjectId,
+            ref: "Comment"
+        }],
+        value: {
+            type: Number,
+            default: 0
         }
     }
 }, {
