@@ -353,9 +353,9 @@ const CommentCard = ({
                   <ArrowUp className="h-3.5 w-3.5 text-muted-foreground group-hover:text-green-600 transition-colors" />
                 </motion.button>
                 
-                <span className="px-2 py-0.5 text-xs font-medium min-w-6 text-center text-foreground">
-                  {score}
-                </span>
+                <span className="px-1 py-1 text-xs font-semibold text-green-600 dark:text-green-500 min-w-[2rem] text-center">{upvotes.length}</span>
+                <span className="px-1 text-xs text-muted-foreground">|</span>
+                <span className="px-1 py-1 text-xs font-semibold text-red-600 dark:text-red-500 min-w-[2rem] text-center">{downvotes.length}</span>
                 
                 <motion.button
                   whileHover={{ scale: 1.1 }}
