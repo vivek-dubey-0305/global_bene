@@ -164,9 +164,9 @@ const AdminDashboard = () => {
                   <Shield className="mr-2 h-4 w-4" />
                   Manage Spam
                 </Button>
-                <Button className="w-full justify-start" variant="outline" onClick={() => window.open('https://arced-bark.metabaseapp.com/public/dashboard/83a7cdbd-5fc4-4edf-9c2a-3ab6a9a23b55', '_blank')}>
+                <Button className="w-full justify-start" variant="outline" onClick={() => window.open('https://lime-band.metabaseapp.com/', '_blank')}>
                   <BarChart3 className="mr-2 h-4 w-4" />
-                  Kafka Dashboard
+                  Metabase Dashboard
                 </Button>
               </CardContent>
             </Card>
