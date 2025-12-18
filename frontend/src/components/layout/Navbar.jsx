@@ -503,14 +503,26 @@ const Navbar = ({ user, notificationsCount = 0 }) => {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="md:hidden border-t border-border bg-background"
-          >
-            <div className="px-4 py-4 space-y-4">
+          <>
+            {/* Overlay Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black/50 z-40 md:hidden"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            
+            {/* Mobile Menu */}
+            <motion.div
+              initial={{ opacity: 0, x: -100 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -100 }}
+              transition={{ duration: 0.3 }}
+              className="fixed left-0 top-16 bottom-0 w-64 bg-background border-r border-border z-50 md:hidden overflow-y-auto"
+            >
+              <div className="px-4 py-4 space-y-4">
               {/* Mobile Search */}
               <form onSubmit={handleSearch} className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -542,17 +554,9 @@ const Navbar = ({ user, notificationsCount = 0 }) => {
                   <Home className="h-4 w-4 mr-2" />
                   Home
                 </Button>
-                <Button variant="ghost" onClick={() => { navigate('/trending'); setIsMobileMenuOpen(false); }} className="justify-start">
-                  <TrendingUp className="h-4 w-4 mr-2" />
-                  Trending
-                </Button>
                 <Button variant="ghost" onClick={() => { navigate('/create-post'); setIsMobileMenuOpen(false); }} className="justify-start">
                   <Plus className="h-4 w-4 mr-2" />
                   Create Post
-                </Button>
-                <Button variant="ghost" onClick={() => { navigate('/messages'); setIsMobileMenuOpen(false); }} className="justify-start">
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  Messages
                 </Button>
                 <Button variant="ghost" onClick={() => { navigate('/notifications'); setIsMobileMenuOpen(false); }} className="justify-start relative">
                   <Bell className="h-4 w-4 mr-2" />
@@ -593,8 +597,9 @@ const Navbar = ({ user, notificationsCount = 0 }) => {
                   </Button>
                 </div>
               )}
-            </div>
-          </motion.div>
+              </div>
+            </motion.div>
+          </>
         )}
       </div>
     </motion.nav>
