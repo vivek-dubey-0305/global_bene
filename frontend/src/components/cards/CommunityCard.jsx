@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Users, MessageSquare, Calendar, Crown } from 'lucide-react';
+import { Users, Calendar } from 'lucide-react';
 
 const CommunityCard = ({ community, onJoin, viewMode = 'grid' }) => {
   const formatMemberCount = (count) => {
@@ -59,10 +59,6 @@ const CommunityCard = ({ community, onJoin, viewMode = 'grid' }) => {
                         <span>{formatMemberCount(community.members_count)} members</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <MessageSquare className="h-4 w-4" />
-                        <span>{formatMemberCount(community.postCount)} posts</span>
-                      </div>
-                      <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
                         <span>Created {formatDate(community.createdAt)}</span>
                       </div>
@@ -86,15 +82,11 @@ const CommunityCard = ({ community, onJoin, viewMode = 'grid' }) => {
                   </div>
                 </div>
 
-                {/* Category and Moderators */}
+                {/* Category */}
                 <div className="flex items-center justify-between mt-3">
                   <Badge variant="secondary" className="text-xs">
-                    {community.category}
+                    {community.category || 'General'}
                   </Badge>
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Crown className="h-3 w-3" />
-                    <span>Mods: {community.moderators?.join(', ')}</span>
-                  </div>
                 </div>
               </div>
             </div>
@@ -139,7 +131,7 @@ const CommunityCard = ({ community, onJoin, viewMode = 'grid' }) => {
                 g/{community.title}
               </Link>
               <Badge variant="secondary" className="text-xs mt-1">
-                {community.category}
+                {community.category || 'General'}
               </Badge>
             </div>
           </div>
@@ -156,23 +148,10 @@ const CommunityCard = ({ community, onJoin, viewMode = 'grid' }) => {
                 <Users className="h-4 w-4" />
                 <span>{formatMemberCount(community.members_count)}</span>
               </div>
-              <div className="flex items-center gap-1 text-muted-foreground">
-                <MessageSquare className="h-4 w-4" />
-                <span>{formatMemberCount(community.postCount)}</span>
-              </div>
             </div>
             <div className="text-xs text-muted-foreground">
               Created {formatDate(community.createdAt)}
             </div>
-          </div>
-
-          {/* Moderators */}
-          <div className="flex items-center gap-1 mb-4 text-xs text-muted-foreground">
-            <Crown className="h-3 w-3" />
-            <span className="truncate">
-              Mods: {community.moderators?.slice(0, 2).join(', ')}
-              {community.moderators?.length > 2 && ` +${community.moderators.length - 2} more`}
-            </span>
           </div>
 
           {/* Join Button */}
