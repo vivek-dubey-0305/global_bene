@@ -207,9 +207,9 @@ const PostCard = ({ post, onUpvote, onDownvote, onComment }) => {
                 <AvatarImage src={effectiveCommunityData?.avatar?.secure_url || community?.avatar?.secure_url} />
                 <AvatarFallback>{(effectiveCommunityData?.name || community?.title || 'C')[0]?.toUpperCase()}</AvatarFallback>
               </Avatar>
-              <span className="font-medium hover:text-orange-600 cursor-pointer transition-colors">
+              <Link to={`/g/${effectiveCommunityData?.name || community?.name}`} className="font-medium hover:text-orange-600 cursor-pointer transition-colors">
                 g/{effectiveCommunityData?.title || community?.title}
-              </span>
+              </Link>
               <span>•</span>
               <span>Posted by</span>
               <Avatar className="h-4 w-4 sm:h-5 sm:w-5">
@@ -353,67 +353,69 @@ const PostCard = ({ post, onUpvote, onDownvote, onComment }) => {
               )}
 
               {/* Action buttons - Modern horizontal layout */}
-              <div className="flex flex-wrap items-center gap-1 text-xs sm:text-sm">
-                {/* Vote buttons - Modern design */}
-                <div className="flex items-center bg-muted rounded-full p-1 mr-1 sm:mr-2">
+              <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+                {/* Vote buttons - Professional with visual distinction */}
+                <div className="flex items-center gap-0.5 rounded-full px-0.5 py-0.5 bg-muted/40 dark:bg-muted/20">
                   <motion.button
-                    whileHover={{ scale: 1.1 }}
+                    type="button"
+                    whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => onUpvote(_id)}
-                    className="flex items-center gap-1 px-2 sm:px-3 py-1 rounded-full hover:bg-orange-100 transition-all duration-200 group"
+                    className="flex items-center gap-1 px-1.5 sm:px-2 py-1 rounded-full hover:bg-muted transition-all duration-200 text-muted-foreground hover:text-foreground cursor-pointer"
                   >
-                    <ArrowUp className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 group-hover:text-orange-500 transition-colors" />
+                    <ArrowUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="text-xs font-medium">{upvotes.length}</span>
                   </motion.button>
 
-                  <span className="px-1 py-1 text-xs font-semibold text-green-600 dark:text-green-500 min-w-[2rem] text-center">{upvotes.length}</span>
-                  <span className="px-1 text-xs text-muted-foreground">|</span>
-                  <span className="px-1 py-1 text-xs font-semibold text-red-600 dark:text-red-500 min-w-[2rem] text-center">{downvotes.length}</span>
+                  <div className="w-px h-4 bg-border opacity-50" />
 
                   <motion.button
-                    whileHover={{ scale: 1.1 }}
+                    type="button"
+                    whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => onDownvote(_id)}
-                    className="flex items-center gap-1 px-2 sm:px-3 py-1 rounded-full hover:bg-blue-100 transition-all duration-200 group"
+                    className="flex items-center gap-1 px-1.5 sm:px-2 py-1 rounded-full hover:bg-muted transition-all duration-200 text-muted-foreground hover:text-foreground cursor-pointer"
                   >
-                    <ArrowDown className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 group-hover:text-blue-500 transition-colors" />
+                    <ArrowDown className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="text-xs font-medium">{downvotes.length}</span>
                   </motion.button>
                 </div>
 
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   onClick={() => onComment(_id)}
-                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-2 rounded-full hover:bg-muted transition-all duration-200 text-muted-foreground hover:text-foreground"
+                  className="flex items-center gap-1 px-1.5 sm:px-2 py-1 rounded-full hover:bg-muted transition-all duration-200 text-muted-foreground hover:text-foreground"
                 >
-                  <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="font-medium">{num_comments}</span>
+                  <MessageCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="text-xs font-medium">{num_comments}</span>
                 </motion.button>
 
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   onClick={handleShare}
-                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-2 rounded-full hover:bg-muted transition-all duration-200 text-muted-foreground hover:text-foreground"
+                  className="flex items-center gap-1 px-1.5 sm:px-2 py-1 rounded-full hover:bg-muted transition-all duration-200 text-muted-foreground hover:text-foreground"
                 >
-                  <Share className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="font-medium hidden sm:inline">Share</span>
+                  <Share className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="text-xs font-medium hidden sm:inline">Share</span>
                 </motion.button>
 
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   onClick={handleSaveToggle}
                   disabled={isLoadingSave}
-                  className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-2 rounded-full hover:bg-muted transition-all duration-200 text-muted-foreground hover:text-foreground ${isSaved ? 'text-blue-600' : ''} ${isLoadingSave ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`flex items-center gap-1 px-1.5 sm:px-2 py-1 rounded-full transition-all duration-200 ${isSaved ? 'text-gray-300 dark:text-gray-400' : 'text-muted-foreground hover:bg-muted hover:text-foreground'} ${isLoadingSave ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  <Bookmark className={`h-3 w-3 sm:h-4 sm:w-4 ${isSaved ? 'fill-current' : ''}`} />
-                  <span className="font-medium hidden sm:inline">{isSaved ? 'Saved' : 'Save'}</span>
+                  <Bookmark className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${isSaved ? 'fill-current' : ''}`} />
+                  <span className="text-xs font-medium hidden sm:inline">{isSaved ? 'Saved' : 'Save'}</span>
                 </motion.button>
 
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   onClick={() => setIsReportModalOpen(true)}
-                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-2 rounded-full hover:bg-red-50 hover:text-red-600 transition-all duration-200 text-muted-foreground"
+                  className="flex items-center gap-1 px-1.5 sm:px-2 py-1 rounded-full hover:bg-muted transition-all duration-200 text-muted-foreground hover:text-red-600 dark:hover:text-red-400"
                 >
-                  <Flag className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="font-medium hidden sm:inline">Report</span>
+                  <Flag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="text-xs font-medium hidden sm:inline">Report</span>
                 </motion.button>
               </div>
             </div>
