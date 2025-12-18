@@ -8,6 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { 
   ArrowUp, 
   ArrowDown, 
@@ -25,6 +31,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { fetchRepliesForComment } from '@/redux/slice/comment.slice';
 import ReportModal from '@/components/common/ReportModal';
 import { reportComment } from '@/api/comment.api';
+import { updateComment, deleteComment } from '@/api/comment.api';
 
 const EMPTY_ARRAY = [];
 
@@ -78,6 +85,9 @@ const CommentCard = ({
   const [isRevealed, setIsRevealed] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isReporting, setIsReporting] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editContent, setEditContent] = useState(body);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   // Check if comment should show warning
   const shouldShowWarning = status === 'flagged' || status === 'removed' || spamScore > 0.5 || toxicityScore > 0.5;
@@ -197,6 +207,61 @@ const CommentCard = ({
     }
   };
 
+  const handleEdit = () => {
+    setIsEditMode(true);
+    setShowActions(false);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editContent.trim()) {
+      alert('Comment cannot be empty');
+      return;
+    }
+
+    if (editContent === body) {
+      setIsEditMode(false);
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      await updateComment(_id, { body: editContent.trim() });
+      alert('Comment updated successfully');
+      setIsEditMode(false);
+    } catch (error) {
+      alert('Failed to update comment');
+      console.error('Update error:', error);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditContent(body);
+    setIsEditMode(false);
+  };
+
+  const handleDelete = () => {
+    if (window.confirm('Are you sure you want to delete this comment?')) {
+      deleteCommentHandler();
+    }
+  };
+
+  const deleteCommentHandler = async () => {
+    setIsUpdating(true);
+    try {
+      await deleteComment(_id);
+      alert('Comment deleted successfully');
+      setShowActions(false);
+      // Optionally refresh or update the UI
+    } catch (error) {
+      alert('Failed to delete comment');
+      console.error('Delete error:', error);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   const handleReply = async () => {
     if (!replyContent.trim()) return;
     try {
@@ -227,7 +292,7 @@ const CommentCard = ({
       style={{ marginLeft }}
       className={`group relative mb-2 ${depth > 0 ? 'ml-4' : ''}`}
     >
-      <Card className={`comment-card ${getDepthStyling()} hover:shadow-md transition-all duration-300 overflow-hidden`}>
+      <Card className={`comment-card ${getDepthStyling()} hover:shadow-md transition-all duration-300 relative`}>
         <CardContent className="p-3">
           {/* Header with author info */}
           <div className="flex items-start justify-between mb-2">
@@ -261,14 +326,52 @@ const CommentCard = ({
 
             {/* More options */}
             <div ref={actionsRef} className="relative">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setShowActions(!showActions)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-full hover:bg-muted"
-              >
-                <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
-              </motion.button>
+              {user && author?._id && user._id === author._id && (
+                <>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => setShowActions(!showActions)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-full hover:bg-muted"
+                  >
+                    <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                  </motion.button>
+                  
+                  {/* Quick actions dropdown - moved inside actionsRef */}
+                  <AnimatePresence>
+                    {showActions && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute top-8 right-0 z-50 bg-card border border-border rounded-lg shadow-lg py-1 min-w-[120px]"
+                      >
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit();
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                        >
+                          <Edit3 className="h-3.5 w-3.5" />
+                          Edit
+                        </button>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete();
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          Delete
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </>
+              )}
             </div>
           </div>
 
@@ -301,16 +404,47 @@ const CommentCard = ({
 
           {/* Comment content */}
           <div className={`mb-2 relative ${isSensitive && !isRevealed ? 'blur-lg select-none' : ''}`}>
-            <p className="text-sm leading-relaxed text-foreground whitespace-pre-wrap">
-              {body}
-            </p>
+            {isEditMode ? (
+              <div className="space-y-2">
+                <Textarea
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  className="min-h-24 resize-none border-primary/50 focus:border-primary"
+                  placeholder="Edit your comment..."
+                  disabled={isUpdating}
+                />
+                <div className="flex gap-2 justify-end">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleCancelEdit}
+                    disabled={isUpdating}
+                    className="h-8 px-3"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleSaveEdit}
+                    disabled={isUpdating}
+                    className="h-8 px-3"
+                  >
+                    {isUpdating ? 'Saving...' : 'Save'}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm leading-relaxed text-foreground whitespace-pre-wrap">
+                  {body}
+                </p>
 
-            {/* Tags */}
-            {tags && tags.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-2">
-                {tags.map((tag, index) => (
-                  <Badge 
-                    key={`${tag}-${index}`}
+                {/* Tags */}
+                {tags && tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {tags.map((tag, index) => (
+                      <Badge 
+                        key={`${tag}-${index}`}
                     variant="secondary" 
                     className="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200"
                   >
@@ -337,33 +471,37 @@ const CommentCard = ({
                 </div>
               </div>
             )}
+              </>
+            )}
           </div>
 
           {/* Voting and actions bar */}
           <div className="flex items-center justify-between">
             {/* Vote section */}
-            <div className="flex items-center gap-1">
-              <div className="flex items-center bg-muted/50 rounded-full p-1">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 rounded-full px-1 py-1 bg-muted/40 dark:bg-muted/20">
                 <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
+                  type="button"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => onUpvote(_id)}
-                  className="comment-vote-button p-1 rounded-full hover:bg-green-100 dark:hover:bg-green-900/20 transition-colors group"
+                  className="flex items-center gap-1 px-2 py-1 rounded-full hover:bg-muted transition-all duration-200 text-muted-foreground hover:text-foreground cursor-pointer"
                 >
-                  <ArrowUp className="h-3.5 w-3.5 text-muted-foreground group-hover:text-green-600 transition-colors" />
+                  <ArrowUp className="h-3.5 w-3.5" />
+                  <span className="text-xs font-medium">{upvotes.length}</span>
                 </motion.button>
                 
-                <span className="px-1 py-1 text-xs font-semibold text-green-600 dark:text-green-500 min-w-[2rem] text-center">{upvotes.length}</span>
-                <span className="px-1 text-xs text-muted-foreground">|</span>
-                <span className="px-1 py-1 text-xs font-semibold text-red-600 dark:text-red-500 min-w-[2rem] text-center">{downvotes.length}</span>
+                <div className="w-px h-4 bg-border opacity-50" />
                 
                 <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
+                  type="button"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => onDownvote(_id)}
-                  className="comment-vote-button p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors group"
+                  className="flex items-center gap-1 px-2 py-1 rounded-full hover:bg-muted transition-all duration-200 text-muted-foreground hover:text-foreground cursor-pointer"
                 >
-                  <ArrowDown className="h-3.5 w-3.5 text-muted-foreground group-hover:text-red-600 transition-colors" />
+                  <ArrowDown className="h-3.5 w-3.5" />
+                  <span className="text-xs font-medium">{downvotes.length}</span>
                 </motion.button>
               </div>
             </div>
@@ -527,30 +665,6 @@ const CommentCard = ({
           )}
         </CardContent>
       </Card>
-
-      {/* Quick actions dropdown */}
-      {showActions && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: -10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: -10 }}
-          transition={{ duration: 0.15 }}
-          className="absolute top-12 right-4 z-10 bg-card border border-border rounded-lg shadow-lg py-1 min-w-[120px]"
-        >
-          <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
-            <Edit3 className="h-3.5 w-3.5" />
-            Edit
-          </button>
-          <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
-            <Flag className="h-3.5 w-3.5" />
-            Report
-          </button>
-          <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-            <Trash2 className="h-3.5 w-3.5" />
-            Delete
-          </button>
-        </motion.div>
-      )}
 
       {/* Report Modal */}
       <ReportModal
