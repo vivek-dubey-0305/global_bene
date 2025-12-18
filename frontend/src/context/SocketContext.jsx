@@ -37,14 +37,31 @@ export const SocketProvider = ({ children }) => {
       setupPushNotifications();
 
       // Connect to socket server
-      socketRef.current = io(import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000', {
+      const socketUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+      socketRef.current = io(socketUrl, {
         withCredentials: true,
+        transports: ['websocket', 'polling'], // Try websocket first, fallback to polling
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
       });
 
       const socket = socketRef.current;
 
-      // Join user room
-      socket.emit('join-user', user._id);
+      // Connection event handlers
+      socket.on('connect', () => {
+        console.log('Socket connected:', socket.id);
+        // Join user room on connect/reconnect
+        socket.emit('join-user', user._id);
+      });
+
+      socket.on('connect_error', (error) => {
+        console.error('Socket connection error:', error.message);
+      });
+
+      socket.on('disconnect', (reason) => {
+        console.log('Socket disconnected:', reason);
+      });
 
       // Fetch initial unread count
       dispatch(fetchUnreadCount());
