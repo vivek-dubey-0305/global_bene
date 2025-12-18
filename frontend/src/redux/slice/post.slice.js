@@ -385,24 +385,22 @@ const postSlice = createSlice({
       })
       // Save post
       .addCase(savePost.pending, (state) => {
-        state.loading = true;
+        // Don't set global loading - component handles its own loading state
       })
       .addCase(savePost.fulfilled, (state) => {
-        state.loading = false;
+        // No state changes needed - optimistic update already applied
       })
       .addCase(savePost.rejected, (state, action) => {
-        state.loading = false;
         state.error = action.payload;
       })
       // Unsave post
       .addCase(unsavePost.pending, (state) => {
-        state.loading = true;
+        // Don't set global loading - component handles its own loading state
       })
       .addCase(unsavePost.fulfilled, (state) => {
-        state.loading = false;
+        // No state changes needed - optimistic update already applied
       })
       .addCase(unsavePost.rejected, (state, action) => {
-        state.loading = false;
         state.error = action.payload;
       })
       // Fetch saved posts
