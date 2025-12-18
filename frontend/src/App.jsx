@@ -109,6 +109,11 @@ const AppContent = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  // Check auth status on app initialization
+  useEffect(() => {
+    dispatch(checkAuthStatus());
+  }, [dispatch]);
+
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const auth = searchParams.get('auth');
