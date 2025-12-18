@@ -108,6 +108,7 @@ const authSlice = createSlice({
     user: null,
     isAuthenticated: false,
     loading: false,
+    initializing: true,
     error: null,
   },
   reducers: {
@@ -178,13 +179,18 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
       })
       // Check auth status
+      .addCase(checkAuthStatus.pending, (state) => {
+        state.initializing = true;
+      })
       .addCase(checkAuthStatus.fulfilled, (state, action) => {
         state.loading = false;
+        state.initializing = false;
         state.user = action.payload.user;
         state.isAuthenticated = true;
       })
       .addCase(checkAuthStatus.rejected, (state) => {
         state.loading = false;
+        state.initializing = false;
         state.isAuthenticated = false;
         state.user = null;
       })
