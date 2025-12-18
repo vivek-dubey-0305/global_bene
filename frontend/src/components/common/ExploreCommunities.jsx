@@ -12,7 +12,7 @@ import { Loader } from '@/components/common/Loader';
 import { Search, Grid3X3, List, Plus, Filter, TrendingUp, Users, Calendar } from 'lucide-react';
 import { getAllCommunities, joinCommunity, leaveCommunity } from '../../redux/slice/community.slice.js';
 
-const categories = ['All', 'Technology', 'Gaming', 'Science', 'Art & Design', 'Health & Fitness', 'Food & Cooking', 'Travel'];
+const categories = ['All', 'General', 'Technology', 'Sports', 'Entertainment', 'Education', 'Health', 'Business', 'Politics', 'Science', 'Art', 'Music', 'Gaming', 'Food', 'Travel', 'Fashion', 'Other'];
 
 const ExploreCommunities = () => {
   const dispatch = useDispatch();
@@ -33,10 +33,10 @@ const ExploreCommunities = () => {
 
   useEffect(() => {
     // Transform communities data for display
+    console.log('Raw communities from API:', communities); // Debug log
     const transformed = (communities || []).map(community => ({
       ...community,
       displayName: community.name.charAt(0).toUpperCase() + community.name.slice(1),
-      category: 'General', // Since category not in model, set default
       postCount: 0, // Not in model, set to 0
       isJoined: localJoinStates[community._id] !== undefined 
         ? localJoinStates[community._id] 
@@ -45,6 +45,7 @@ const ExploreCommunities = () => {
           )),
       moderators: community.moderators ? community.moderators.map(mod => mod.username) : []
     }));
+    console.log('Transformed communities:', transformed); // Debug log
     setTransformedCommunities(transformed);
   }, [communities, user, localJoinStates]);
 
