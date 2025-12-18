@@ -471,7 +471,13 @@ const UserProfilePage = () => {
                     <div className="text-center py-12">
                       <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                       <h3 className="text-lg font-medium text-foreground mb-2">No posts yet</h3>
-                      <p className="text-muted-foreground">This user hasn't posted anything yet.</p>
+                      <p className="text-muted-foreground mb-6">This user hasn't posted anything yet.</p>
+                      {isAuthenticated && currentUser && currentUser._id === profileUser?._id && (
+                        <Button onClick={() => navigate('/create-post')} className="gap-2">
+                          <FileText className="w-4 h-4" />
+                          Create Post
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
