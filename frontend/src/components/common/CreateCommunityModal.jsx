@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X, Upload, Image as ImageIcon, AlertCircle, CheckCircle } from 'lucide-react';
 
 const CreateCommunityModal = ({ isOpen, onClose, onCreate }) => {
@@ -15,6 +16,7 @@ const CreateCommunityModal = ({ isOpen, onClose, onCreate }) => {
     name: '',
     displayName: '',
     description: '',
+    category: 'General',
     isPrivate: false,
     allowImages: true,
     allowVideos: true,
@@ -109,6 +111,7 @@ const CreateCommunityModal = ({ isOpen, onClose, onCreate }) => {
     formDataToSend.append('title', formData.displayName);
     formDataToSend.append('name', formData.name);
     formDataToSend.append('description', formData.description);
+    formDataToSend.append('category', formData.category);
     formDataToSend.append('rules', JSON.stringify(formData.rules));
 
     // Add avatar file if selected
@@ -144,6 +147,7 @@ const CreateCommunityModal = ({ isOpen, onClose, onCreate }) => {
         name: '',
         displayName: '',
         description: '',
+        category: 'General',
         isPrivate: false,
         allowImages: true,
         allowVideos: true,
@@ -274,6 +278,40 @@ const CreateCommunityModal = ({ isOpen, onClose, onCreate }) => {
                     {formData.description.length}/500
                   </span>
                 </div>
+              </div>
+
+              {/* Category */}
+              <div className="space-y-2">
+                <Label htmlFor="category" className="text-sm font-semibold">
+                  Category *
+                </Label>
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) => handleInputChange('category', value)}
+                  disabled={createLoading}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="General">General</SelectItem>
+                    <SelectItem value="Technology">Technology</SelectItem>
+                    <SelectItem value="Sports">Sports</SelectItem>
+                    <SelectItem value="Entertainment">Entertainment</SelectItem>
+                    <SelectItem value="Education">Education</SelectItem>
+                    <SelectItem value="Health">Health</SelectItem>
+                    <SelectItem value="Business">Business</SelectItem>
+                    <SelectItem value="Politics">Politics</SelectItem>
+                    <SelectItem value="Science">Science</SelectItem>
+                    <SelectItem value="Art">Art</SelectItem>
+                    <SelectItem value="Music">Music</SelectItem>
+                    <SelectItem value="Gaming">Gaming</SelectItem>
+                    <SelectItem value="Food">Food</SelectItem>
+                    <SelectItem value="Travel">Travel</SelectItem>
+                    <SelectItem value="Fashion">Fashion</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Community Rules */}
