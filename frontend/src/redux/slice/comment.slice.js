@@ -318,7 +318,10 @@ const commentSlice = createSlice({
       })
       // Update comment
       .addCase(updateComment.fulfilled, (state, action) => {
-        const updatedComment = action.payload;
+        // Handle both regular response and flagged response format
+        const updatedComment = action.payload?.comment || action.payload;
+        if (!updatedComment?._id) return;
+        
         // Update in commentsByPost
         Object.keys(state.commentsByPost).forEach(postId => {
           const index = state.commentsByPost[postId].comments.findIndex(c => c._id === updatedComment._id);
