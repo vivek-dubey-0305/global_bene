@@ -118,6 +118,28 @@ axiosInstance.interceptors.request.use(
     const token = localStorage.getItem("accessToken");
     if (token) config.headers.Authorization = `Bearer ${token}`;
 
+    // Remove Content-Type for FormData to let browser set it with proper boundary
+    // This is critical for multipart/form-data uploads to work correctly
+    if (config.data instanceof FormData) {
+      // Delete from all possible header locations in axios config
+      delete config.headers['Content-Type'];
+      delete config.headers['content-type'];
+      if (config.headers.common) {
+        delete config.headers.common['Content-Type'];
+        delete config.headers.common['content-type'];
+      }
+      if (config.headers.post) {
+        delete config.headers.post['Content-Type'];
+        delete config.headers.post['content-type'];
+      }
+      if (config.headers.put) {
+        delete config.headers.put['Content-Type'];
+        delete config.headers.put['content-type'];
+      }
+      // Explicitly set to undefined to ensure axios doesn't use default
+      config.headers['Content-Type'] = undefined;
+    }
+
     // Add geolocation
     const geo = await getGeolocation();
     if (geo.latitude && geo.longitude) {
