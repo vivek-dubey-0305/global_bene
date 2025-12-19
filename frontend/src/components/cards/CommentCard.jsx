@@ -28,10 +28,9 @@ import {
   EyeOff
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { fetchRepliesForComment } from '@/redux/slice/comment.slice';
+import { fetchRepliesForComment, updateComment as updateCommentAction, deleteComment as deleteCommentAction } from '@/redux/slice/comment.slice';
 import ReportModal from '@/components/common/ReportModal';
 import { reportComment } from '@/api/comment.api';
-import { updateComment, deleteComment } from '@/api/comment.api';
 
 const EMPTY_ARRAY = [];
 
@@ -225,9 +224,13 @@ const CommentCard = ({
 
     setIsUpdating(true);
     try {
-      await updateComment(_id, { body: editContent.trim() });
-      alert('Comment updated successfully');
-      setIsEditMode(false);
+      const result = await dispatch(updateCommentAction({ commentId: _id, updateData: { body: editContent.trim() } }));
+      if (updateCommentAction.fulfilled.match(result)) {
+        alert('Comment updated successfully');
+        setIsEditMode(false);
+      } else {
+        throw new Error(result.payload || 'Failed to update comment');
+      }
     } catch (error) {
       alert('Failed to update comment');
       console.error('Update error:', error);
@@ -250,10 +253,13 @@ const CommentCard = ({
   const deleteCommentHandler = async () => {
     setIsUpdating(true);
     try {
-      await deleteComment(_id);
-      alert('Comment deleted successfully');
-      setShowActions(false);
-      // Optionally refresh or update the UI
+      const result = await dispatch(deleteCommentAction(_id));
+      if (deleteCommentAction.fulfilled.match(result)) {
+        alert('Comment deleted successfully');
+        setShowActions(false);
+      } else {
+        throw new Error(result.payload || 'Failed to delete comment');
+      }
     } catch (error) {
       alert('Failed to delete comment');
       console.error('Delete error:', error);
