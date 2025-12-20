@@ -55,7 +55,7 @@ export const updateComment = async (commentId, updateData) => {
 export const deleteComment = async (commentId) => {
   try {
     const response = await axiosInstance.delete(`/comments/${commentId}`);
-    return response.data;
+    return response.data.data;
   } catch (error) {
     throw error.response?.data || error;
   }
