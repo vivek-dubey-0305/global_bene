@@ -338,7 +338,12 @@ const commentSlice = createSlice({
         });
       })
       // Delete comment
+      .addCase(deleteComment.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(deleteComment.fulfilled, (state, action) => {
+        state.loading = false;
         const deletedCommentId = action.payload;
         // Remove from commentsByPost
         Object.keys(state.commentsByPost).forEach(postId => {
@@ -348,6 +353,10 @@ const commentSlice = createSlice({
         Object.keys(state.repliesByComment).forEach(commentId => {
           state.repliesByComment[commentId].replies = state.repliesByComment[commentId].replies.filter(r => r._id !== deletedCommentId);
         });
+      })
+      .addCase(deleteComment.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       })
       // Upvote comment
       .addCase(upvoteComment.fulfilled, (state, action) => {
