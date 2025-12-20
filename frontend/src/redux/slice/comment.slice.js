@@ -62,10 +62,12 @@ export const deleteComment = createAsyncThunk(
   'comment/deleteComment',
   async (commentId, { rejectWithValue }) => {
     try {
-      await deleteCommentApi(commentId);
-      return commentId;
+      const result = await deleteCommentApi(commentId);
+      // Returns either the updated comment (soft delete) or an object with commentId (hard delete)
+      return result;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to delete comment');
+      console.error('Delete comment thunk error:', error);
+      return rejectWithValue(error?.message || 'Failed to delete comment');
     }
   }
 );
@@ -344,15 +346,41 @@ const commentSlice = createSlice({
       })
       .addCase(deleteComment.fulfilled, (state, action) => {
         state.loading = false;
-        const deletedCommentId = action.payload;
-        // Remove from commentsByPost
-        Object.keys(state.commentsByPost).forEach(postId => {
-          state.commentsByPost[postId].comments = state.commentsByPost[postId].comments.filter(c => c._id !== deletedCommentId);
-        });
-        // Remove from repliesByComment
-        Object.keys(state.repliesByComment).forEach(commentId => {
-          state.repliesByComment[commentId].replies = state.repliesByComment[commentId].replies.filter(r => r._id !== deletedCommentId);
-        });
+        const result = action.payload;
+        
+        // Check if it's a soft delete (returns full comment object with status: 'removed')
+        if (result && result._id && result.status === 'removed') {
+          // It's a soft delete - update the comment instead of removing it
+          const updatedComment = result;
+          
+          // Update in commentsByPost
+          Object.keys(state.commentsByPost).forEach(postId => {
+            const index = state.commentsByPost[postId].comments.findIndex(c => c._id === updatedComment._id);
+            if (index !== -1) {
+              state.commentsByPost[postId].comments[index] = updatedComment;
+            }
+          });
+          // Update in repliesByComment
+          Object.keys(state.repliesByComment).forEach(commentId => {
+            const index = state.repliesByComment[commentId].replies.findIndex(r => r._id === updatedComment._id);
+            if (index !== -1) {
+              state.repliesByComment[commentId].replies[index] = updatedComment;
+            }
+          });
+        } else {
+          // It's a hard delete (moderator delete) - remove from state
+          // Result could be { commentId: id } or the commentId directly
+          const deletedCommentId = result.commentId || result;
+          
+          // Remove from commentsByPost
+          Object.keys(state.commentsByPost).forEach(postId => {
+            state.commentsByPost[postId].comments = state.commentsByPost[postId].comments.filter(c => c._id !== deletedCommentId);
+          });
+          // Remove from repliesByComment
+          Object.keys(state.repliesByComment).forEach(commentId => {
+            state.repliesByComment[commentId].replies = state.repliesByComment[commentId].replies.filter(r => r._id !== deletedCommentId);
+          });
+        }
       })
       .addCase(deleteComment.rejected, (state, action) => {
         state.loading = false;
