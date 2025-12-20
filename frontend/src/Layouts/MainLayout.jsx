@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
@@ -13,7 +13,13 @@ const MainLayout = ({ children, communities = [], userCommunities = [] }) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { user } = useSelector((state) => state.auth);
   const { unreadCount } = useSelector((state) => state.notification);
+  const reduxCommunities = useSelector((state) => state.community?.communities || []);
   const location = useLocation();
+
+  // Use passed communities first, fallback to Redux communities
+  const communitiesToPass = useMemo(() => {
+    return communities && communities.length > 0 ? communities : reduxCommunities;
+  }, [communities, reduxCommunities]);
 
   const hideRightSidebar = ['/about', '/help', '/privacy', '/terms'].includes(location.pathname);
 
@@ -47,7 +53,7 @@ const MainLayout = ({ children, communities = [], userCommunities = [] }) => {
         {!hideRightSidebar && (
           <aside className="hidden lg:block w-80 xl:w-96 pr-4 sm:pr-6 lg:pr-8 py-4 sm:py-6 shrink-0">
             <Sidebar
-              communities={communities}
+              communities={communitiesToPass}
               userCommunities={userCommunities}
               onCreateCommunity={() => setShowCreateModal(true)}
             />
