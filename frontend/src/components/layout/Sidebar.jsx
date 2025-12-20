@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -9,7 +10,13 @@ import { Separator } from '@/components/ui/separator';
 import { Plus, TrendingUp, Users, Star } from 'lucide-react';
 
 const Sidebar = ({ communities = [], userCommunities = [], onCreateCommunity }) => {
-  const popularCommunities = communities.slice(0, 5);
+  const reduxCommunities = useSelector(state => state.community?.communities || []);
+  // Use passed communities first, fallback to Redux communities
+  const communitiesToUse = communities && communities.length > 0 ? communities : reduxCommunities;
+  const popularCommunities = useMemo(() => {
+    if (!communitiesToUse || communitiesToUse.length === 0) return [];
+    return communitiesToUse.slice(0, 5);
+  }, [communitiesToUse]);
 
   return (
     <div className="w-80 space-y-4">
