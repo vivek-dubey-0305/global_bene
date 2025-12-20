@@ -80,7 +80,7 @@ const CommunityPage = () => {
   useEffect(() => {
     if (currentCommunity && user) {
       setIsMember(currentCommunity.members.some(member => member._id === user._id));
-      setIsCreator(currentCommunity.creator_id._id === user._id);
+      setIsCreator(currentCommunity.creator_id && currentCommunity.creator_id._id === user._id);
     }
   }, [currentCommunity, user]);
 
@@ -371,28 +371,30 @@ const CommunityPage = () => {
             </Card>
 
             {/* Creator */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Crown className="w-5 h-5" />
-                  Created By
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-3">
-                  <Avatar className="w-10 h-10">
-                    <AvatarImage src={displayCommunity.creator_id.avatar?.secure_url} />
-                    <AvatarFallback>
-                      {getInitials(displayCommunity.creator_id.username)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-medium">{displayCommunity.creator_id.username || 'User'}</p>
-                    <p className="text-sm text-muted-foreground">Community Creator</p>
+            {displayCommunity.creator_id && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Crown className="w-5 h-5" />
+                    Created By
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Avatar className="w-10 h-10 shrink-0">
+                      <AvatarImage src={displayCommunity.creator_id.avatar?.secure_url} />
+                      <AvatarFallback>
+                        {getInitials(displayCommunity.creator_id.username)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <p className="font-medium truncate">{displayCommunity.creator_id.username || 'User'}</p>
+                      <p className="text-sm text-muted-foreground">Community Creator</p>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Moderators */}
             {displayCommunity.moderators && displayCommunity.moderators.length > 0 && (
