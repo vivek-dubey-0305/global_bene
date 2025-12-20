@@ -55,9 +55,11 @@ export const updateComment = async (commentId, updateData) => {
 export const deleteComment = async (commentId) => {
   try {
     const response = await axiosInstance.delete(`/comments/${commentId}`);
-    return commentId;
+    // Returns either the updated comment (soft delete by author) or just commentId (hard delete by moderator)
+    return response.data.data;
   } catch (error) {
-    throw error.response?.data || error;
+    console.error('Delete comment error:', error);
+    throw error.response?.data?.message || error.message || 'Failed to delete comment';
   }
 };
 
