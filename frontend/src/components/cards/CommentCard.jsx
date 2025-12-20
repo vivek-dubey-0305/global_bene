@@ -363,7 +363,7 @@ const CommentCard = ({
                           <Edit3 className="h-3.5 w-3.5" />
                           Edit
                         </button>
-                        <button 
+                        {/* <button 
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDelete();
@@ -372,7 +372,7 @@ const CommentCard = ({
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                           Delete
-                        </button>
+                        </button> */}
                       </motion.div>
                     )}
                   </AnimatePresence>
