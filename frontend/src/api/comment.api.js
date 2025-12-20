@@ -55,7 +55,7 @@ export const updateComment = async (commentId, updateData) => {
 export const deleteComment = async (commentId) => {
   try {
     const response = await axiosInstance.delete(`/comments/${commentId}`);
-    return response.data.data;
+    return commentId;
   } catch (error) {
     throw error.response?.data || error;
   }
@@ -89,4 +89,4 @@ export const reportComment = async (commentId, reason, description) => {
   } catch (error) {
     throw error.response?.data || error;
   }
-};
+};  
