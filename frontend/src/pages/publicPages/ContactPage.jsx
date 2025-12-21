@@ -357,19 +357,6 @@ const ContactPage = () => {
               )}
             </div>
 
-            {/* Additional Help */}
-            <Card className="mt-6 bg-primary/5 border-primary/20">
-              <CardHeader>
-                <CardTitle className="text-lg">Still need help?</CardTitle>
-                <CardDescription>
-                  Can't find what you're looking for? Our support team is ready to assist you.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex gap-3">
-                <Button variant="default">Contact Support</Button>
-                <Button variant="outline">Browse Documentation</Button>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>
