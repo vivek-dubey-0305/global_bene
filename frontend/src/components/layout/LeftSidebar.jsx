@@ -43,7 +43,7 @@ const LeftSidebar = () => {
 
   const footerLinks = [
     { label: 'About', path: '/about' },
-    { label: 'Help', path: '/help' },
+    // { label: 'Help', path: '/help' },
     { label: 'Privacy', path: '/privacy' },
     { label: 'Terms', path: '/terms' },
   ];
