@@ -92,7 +92,7 @@ const CreatePostPage = lazy(() => import('./pages/publicPages/CreatePostPage'));
 const PostDetailPage = lazy(() => import('./pages/publicPages/PostDetailPage'));
 const ProtectedRoute = lazy(() => import('./routes/ProtectedRoute'));
 const AboutPage = lazy(() => import('@/pages/publicPages/AboutPage'));
-const ContactPage = lazy(() => import('@/pages/publicPages/ContactPage'));
+// const ContactPage = lazy(() => import('@/pages/publicPages/ContactPage'));
 const PrivacyPolicyPage = lazy(() => import('@/pages/publicPages/PrivacyPolicyPage'));
 const TermsConditionPage = lazy(() => import('@/pages/publicPages/TermsConditionPage'));
 const AdminDashboard = lazy(() => import('@/pages/adminPages/AdminDashboard'));
@@ -154,7 +154,7 @@ const AppContent = () => {
           <Route path="/create-post" element={<ProtectedRoute><CreatePostPage /></ProtectedRoute>} />
           <Route path="/post/:postId" element={<ProtectedRoute><PostDetailPage /></ProtectedRoute>} />
           <Route path="/about" element={<AboutPage />} />
-          <Route path="/help" element={<ContactPage />} />
+          {/* <Route path="/help" element={<ContactPage />} /> */}
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
           <Route path="/terms" element={<TermsConditionPage />} />
           <Route path="/admin/dashboard" element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
