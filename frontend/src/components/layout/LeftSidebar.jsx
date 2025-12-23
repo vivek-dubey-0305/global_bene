@@ -14,7 +14,8 @@ import {
   Settings,
   Shield,
   PanelLeft,
-  PanelLeftClose
+  PanelLeftClose,
+  Star
 } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { useSidebar } from '@/context/SidebarContext';
@@ -27,6 +28,7 @@ const LeftSidebar = () => {
   const navigationItems = [
     { icon: Home, label: 'Home', path: '/', exact: true },
     { icon: TrendingUp, label: 'Popular', path: '/popular' },
+    { icon: Star, label: 'Recommendations', path: '/recommended' },
     { icon: Globe, label: 'All', path: '/all' },
     { icon: Users, label: 'Communities', path: '/communities' },
   ];
