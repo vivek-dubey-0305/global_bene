@@ -140,6 +140,7 @@ const AppContent = () => {
           <Route path="/" element={<LandingPage />} />
           <Route path="/all" element={<LandingPage />} />
           <Route path="/popular" element={<LandingPage />} />
+          <Route path="/recommended" element={<ProtectedRoute><LandingPage /></ProtectedRoute>} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
