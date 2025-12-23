@@ -10,7 +10,8 @@ import {
   downvotePost as downvotePostApi,
   savePost as savePostApi,
   unsavePost as unsavePostApi,
-  getSavedPosts as getSavedPostsApi
+  getSavedPosts as getSavedPostsApi,
+  getRecommendedPosts as getRecommendedPostsApi
 } from '../../api/post.api';
 import { updateSavedPosts } from './auth.slice';
 
@@ -35,6 +36,18 @@ export const fetchPosts = createAsyncThunk(
       return response;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch posts');
+    }
+  }
+);
+
+export const fetchRecommendedPosts = createAsyncThunk(
+  'post/fetchRecommendedPosts',
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const response = await getRecommendedPostsApi(params);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch recommended posts');
     }
   }
 );
@@ -283,6 +296,25 @@ const postSlice = createSlice({
         };
       })
       .addCase(fetchPosts.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Fetch recommended posts
+      .addCase(fetchRecommendedPosts.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.posts = []; // Clear posts while loading to prevent showing stale data
+      })
+      .addCase(fetchRecommendedPosts.fulfilled, (state, action) => {
+        state.loading = false;
+        state.posts = (action.payload || []).filter(post => post && post._id);
+        state.pagination = {
+          currentPage: 1,
+          totalPages: 1,
+          totalPosts: action.payload.length || 0
+        };
+      })
+      .addCase(fetchRecommendedPosts.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
