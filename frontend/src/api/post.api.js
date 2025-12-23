@@ -115,6 +115,16 @@ export const getSavedPosts = async (params = {}) => {
   }
 };
 
+// Get recommended posts for the authenticated user
+export const getRecommendedPosts = async (params = {}) => {
+  try {
+    const response = await axiosInstance.get('/posts/recommended', { params });
+    return response.data.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
 // Get posts by user
 export const getUserPosts = async (userId, params = {}) => {
   try {
