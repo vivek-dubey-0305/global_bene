@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader } from '@/components/common/Loader';
 import { Flame, Clock, TrendingUp, Star, ChevronLeft, ChevronRight } from 'lucide-react';
-import { fetchPosts, upvotePost, downvotePost } from '@/redux/slice/post.slice';
+import { fetchPosts, upvotePost, downvotePost, fetchRecommendedPosts } from '@/redux/slice/post.slice';
 import { getAllCommunities } from '@/redux/slice/community.slice';
 
 const LandingPage = () => {
@@ -27,6 +27,8 @@ const LandingPage = () => {
       setSortBy('trending');
     } else if (path === '/all') {
       setSortBy('new');
+    } else if (path === '/recommended') {
+      setSortBy('recommended');
     } else {
       setSortBy('hot');
     }
@@ -35,12 +37,16 @@ const LandingPage = () => {
 
   useEffect(() => {
     // Fetch real posts from API
-    const params = { 
-      sortBy: sortBy === 'hot' ? 'createdAt' : sortBy,
-      page: currentPage,
-      limit: 10
-    };
-    dispatch(fetchPosts(params));
+    if (sortBy === 'recommended') {
+      dispatch(fetchRecommendedPosts());
+    } else {
+      const params = { 
+        sortBy: sortBy === 'hot' ? 'createdAt' : sortBy,
+        page: currentPage,
+        limit: 10
+      };
+      dispatch(fetchPosts(params));
+    }
   }, [dispatch, sortBy, currentPage]);
 
   useEffect(() => {
@@ -154,7 +160,7 @@ const LandingPage = () => {
               )}
 
           {/* Pagination */}
-          {pagination && pagination.totalPages > 1 && (
+          {pagination && pagination.totalPages > 1 && sortBy !== 'recommended' && (
             <div className="flex items-center justify-between mt-8">
               <Button
                 variant="outline"
